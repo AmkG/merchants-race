@@ -1,0 +1,22 @@
+name:             merchrace
+version:          0.0
+synopsis:         Merchant's Race
+description:
+ A game of trade.
+license:          GPL
+license-file:     COPYING
+author:           Alan Manuel K. Gloria
+maintainer:       almkglor@gmail.com
+copyright:        Copyright 2013 Alan Manuel K. Gloria
+build-type:       Simple
+cabal-version:    >= 1.2
+stability:        alpha
+bug-reports:      almkglor@gmail.com
+data-files:
+extra-source-files:
+  README
+
+executable merchrace
+  main-is:        Main.hs
+  build-depends:  base >= 3
+  other-modules:
