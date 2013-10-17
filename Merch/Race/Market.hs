@@ -106,7 +106,10 @@ market = do
 
     let outputRatio = kp * (error % 1) + ki * (integral % 1) + kd * (derivative % 1)
         output = numerator outputRatio `div` denominator outputRatio
-        targetPrice = fromIntegral output + centerPrice
+        outputPrice = fromIntegral output + centerPrice
+        targetPrice
+          | outputPrice < 2 = 2
+          | otherwise       = outputPrice
     mkSetTargetPrice settlement item targetPrice
 
     mkSetPreviousError settlement item error
