@@ -38,7 +38,7 @@ import Data.Ratio
 class Monad m => MarketM m where
   mkGetAllSettlements :: m [Settlement]
   mkGetAllItems :: m [Item]
-  mkGetStockpile :: Settlement -> Item -> m Integer
+  mkGetSurplus :: Settlement -> Item -> m Integer -- can be negative for a deficit
   -- the PID controller needs to retain these variables
   -- across days.
   mkGetPreviousError :: Settlement -> Item -> m Integer
@@ -92,7 +92,7 @@ market = do
   settlements <- mkGetAllSettlements
   items <- mkGetAllItems
   forM_ [(s,i)|s <- settlements, i <- items] $ \(settlement, item) -> do
-    stockpile <- mkGetStockpile settlement item
+    stockpile <- mkGetSurplus settlement item
     -- The error is the negation of the stockpile, since
     -- a deficit should *increase* the price.
     let error = negate stockpile
