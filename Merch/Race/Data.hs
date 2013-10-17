@@ -4,6 +4,7 @@ module Merch.Race.Data
   , Item(..)
   , Price(..)
   , Distance(..)
+  , Craftsman(..)
   ) where
 
 newtype Settlement
@@ -18,6 +19,12 @@ newtype Price
 newtype Distance
   = Distance Integer
   deriving (Eq, Ord, Show, Read)
+data Craftsman
+  = Craftsman
+    { craftsmanInputs :: [(Integer, Item)]
+    , craftsmanOutputs :: [(Integer, Item)]
+    }
+  deriving (Eq, Show, Read)
 
 {- Boilerplate.  Avoid using GeneralizedNewtypeDeriving to
    maintain H98 compatibility.  -}

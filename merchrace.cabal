@@ -20,5 +20,6 @@ extra-source-files:
 executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, OpenGL, SDL, SDL-image, SDL-ttf
-  other-modules:  Merch.Race.Data
+  other-modules:  Merch.Race.Craftsmen
+               ,  Merch.Race.Data
                ,  Merch.Race.Market
