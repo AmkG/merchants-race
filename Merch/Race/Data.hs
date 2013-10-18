@@ -5,6 +5,7 @@ module Merch.Race.Data
   , Price(..)
   , Distance(..)
   , Craftsman(..)
+  , ItemSet(..)
   ) where
 
 newtype Settlement
@@ -25,6 +26,20 @@ data Craftsman
     , craftsmanOutputs :: [(Integer, Item)]
     }
   deriving (Eq, Show, Read)
+-- Item sets are either:
+-- any {
+--   # means, any of the following sets
+--   { 1 "Item 1" 3 "Item 2" } # means, all these items
+--   { 1 "Item 4" 3 "Item 5" }
+--   { 2 "Item 3" }
+-- }
+-- or:
+-- { 1 "Item 1" 2 "Item 4" 3 "Item 3" 12 "Item 2" }
+-- the latter is simply a special case of the former
+-- with a single set.
+data ItemSet
+  = ItemSet [(Integer, Item)] [[(Integer, Item)]]
+  deriving (Eq, Ord, Show, Read)
 
 {- Boilerplate.  Avoid using GeneralizedNewtypeDeriving to
    maintain H98 compatibility.  -}

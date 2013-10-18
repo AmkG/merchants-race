@@ -22,4 +22,5 @@ executable merchrace
   build-depends:  base >= 3, OpenGL, SDL, SDL-image, SDL-ttf
   other-modules:  Merch.Race.Craftsmen
                ,  Merch.Race.Data
+               ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.Market
