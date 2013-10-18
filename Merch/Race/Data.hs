@@ -22,8 +22,8 @@ newtype Distance
   deriving (Eq, Ord, Show, Read)
 data Craftsman
   = Craftsman
-    { craftsmanInputs :: [(Integer, Item)]
-    , craftsmanOutputs :: [(Integer, Item)]
+    { craftsmanInputs :: ItemSet
+    , craftsmanOutputs :: ItemSet
     }
   deriving (Eq, Show, Read)
 -- Item sets are either:
