@@ -38,13 +38,13 @@ import Data.Ratio
 class Monad m => MarketM m where
   mkGetAllSettlements :: m [Settlement]
   mkGetAllItems :: m [Item]
-  mkGetSurplus :: Settlement -> Item -> m Integer -- can be negative for a deficit
+  mkGetSurplus :: Settlement -> Item -> m (Ratio Integer) -- can be negative for a deficit
   -- the PID controller needs to retain these variables
   -- across days.
-  mkGetPreviousError :: Settlement -> Item -> m Integer
-  mkSetPreviousError :: Settlement -> Item -> Integer -> m ()
-  mkGetIntegral :: Settlement -> Item -> m Integer
-  mkSetIntegral :: Settlement -> Item -> Integer -> m ()
+  mkGetPreviousError :: Settlement -> Item -> m (Ratio Integer)
+  mkSetPreviousError :: Settlement -> Item -> (Ratio Integer) -> m ()
+  mkGetIntegral :: Settlement -> Item -> m (Ratio Integer)
+  mkSetIntegral :: Settlement -> Item -> (Ratio Integer) -> m ()
   -- The PID outputs the desired market price.
   mkSetTargetPrice :: Settlement -> Item -> Price -> m ()
 
@@ -104,7 +104,7 @@ market = do
     previousError <- mkGetPreviousError settlement item
     let derivative = error - previousError
 
-    let outputRatio = kp * (error % 1) + ki * (integral % 1) + kd * (derivative % 1)
+    let outputRatio = kp * error + ki * integral + kd * derivative
         output = numerator outputRatio `div` denominator outputRatio
         outputPrice = fromIntegral output + centerPrice
         targetPrice
