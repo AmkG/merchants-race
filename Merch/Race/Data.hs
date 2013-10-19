@@ -4,9 +4,14 @@ module Merch.Race.Data
   , Item(..)
   , Price(..)
   , Distance(..)
+  , Day
   , Craftsman(..)
   , ItemSet(..)
+  , ProdCons(..)
+  , ProdConsId(..)
   ) where
+
+import Data.Ratio
 
 newtype Settlement
   = Settlement String
@@ -19,6 +24,9 @@ newtype Price
   deriving (Eq, Ord, Show, Read)
 newtype Distance
   = Distance Integer
+  deriving (Eq, Ord, Show, Read)
+newtype Day
+  = Day Integer
   deriving (Eq, Ord, Show, Read)
 data Craftsman
   = Craftsman
@@ -39,6 +47,13 @@ data Craftsman
 -- with a single set.
 data ItemSet
   = ItemSet [(Integer, Item)] [[(Integer, Item)]]
+  deriving (Eq, Ord, Show, Read)
+data ProdCons
+  = Scheduled Day Day ItemSet
+  | Probability (Ratio Integer) ItemSet
+  deriving (Show, Read)
+newtype ProdConsId
+  = ProdConsId Integer
   deriving (Eq, Ord, Show, Read)
 
 {- Boilerplate.  Avoid using GeneralizedNewtypeDeriving to
@@ -106,4 +121,36 @@ instance Integral Distance where
    where
      (q, r) = a `divMod` b
   toInteger (Distance a) = toInteger a
+
+instance Num Day where
+  Day a + Day b = Day $ a + b
+  Day a - Day b = Day $ a - b
+  Day a * Day b = Day $ a * b
+  negate (Day a) = Day $ negate a
+  abs (Day a) = Day $ abs a
+  signum (Day a) = Day $ signum a
+  fromInteger i = Day $ fromInteger i
+instance Real Day where
+  toRational (Day a) = toRational a
+instance Enum Day where
+  succ (Day a) = Day $ succ a
+  pred (Day a) = Day $ pred a
+  toEnum i = Day $ toEnum i
+  fromEnum (Day a) = fromEnum a
+  enumFrom (Day a) = map Day $ enumFrom a
+  enumFromThen (Day a) (Day a') = map Day $ enumFromThen a a'
+  enumFromTo (Day a) (Day a') = map Day $ enumFromTo a a'
+  enumFromThenTo (Day a) (Day a') (Day a'') = map Day $ enumFromThenTo a a' a''
+instance Integral Day where
+  Day a `quot` Day b = Day $ a `quot` b
+  Day a `rem` Day b = Day $ a `rem` b
+  Day a `div` Day b = Day $ a `div` b
+  Day a `mod` Day b = Day $ a `mod` b
+  Day a `quotRem` Day b = (Day q, Day r)
+   where
+     (q, r) = a `quotRem` b
+  Day a `divMod` Day b = (Day q, Day r)
+   where
+     (q, r) = a `divMod` b
+  toInteger (Day a) = toInteger a
 

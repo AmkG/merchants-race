@@ -25,3 +25,4 @@ executable merchrace
                ,  Merch.Race.Data
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.Market
+               ,  Merch.Race.ProdCons
