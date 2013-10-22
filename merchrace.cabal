@@ -19,10 +19,13 @@ extra-source-files:
 
 executable merchrace
   main-is:        Main.hs
-  build-depends:  base >= 3, containers, astar, OpenGL, SDL, SDL-image, SDL-ttf
+  build-depends:  base >= 3, containers, astar, OpenGL
+               ,  SDL, SDL-image, SDL-ttf, Noise
+               ,  random
   other-modules:  Merch.Race.CMerch
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
                ,  Merch.Race.ItemSetPrice
+               ,  Merch.Race.MapGen
                ,  Merch.Race.Market
                ,  Merch.Race.ProdCons
