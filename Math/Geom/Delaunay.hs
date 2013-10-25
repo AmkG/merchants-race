@@ -31,7 +31,7 @@ connect qeds a b = do
 
   return e
 
-delaunay :: (Ord r, Num r, Show r) => [(r,r)] -> ST s (QE s (r,r), EdgeRef, EdgeRef)
+delaunay :: (Ord r, Num r) => [(r,r)] -> ST s (QE s (r,r), EdgeRef, EdgeRef)
 delaunay points = do
   let sortedPoints = nub $ sortBy xycompare points
   qeds <- newQE
