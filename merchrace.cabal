@@ -15,14 +15,18 @@ stability:        alpha
 bug-reports:      almkglor@gmail.com
 data-files:
 extra-source-files:
-  README
+  README,  Math/Geom/DelaunayTest.hs
 
 executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, containers, astar, OpenGL
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  random
-  other-modules:  Merch.Race.CMerch
+  other-modules:  Math.Geom.Delaunay
+               ,  Math.Geom.QuadEdge
+               ,  Math.Geom.QuadEdge.Data
+               ,  Math.Geom.QuadEdge.Pure
+               ,  Merch.Race.CMerch
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
                ,  Merch.Race.ItemSetPrice
