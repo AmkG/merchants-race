@@ -5,7 +5,8 @@ module Math.Geom.QuadEdge
   ( QE
   , EdgeRef(..)
   -- Constructions
-  , newQE
+  , newQE -- ST s (QE s a)
+  , mapQEM -- QE s a -> (EdgeRef -> ST s a -> ST s b) -> ST s (QE s b)
   -- Queries
   , rot -- EdgeRef -> EdgeRef
   , rotInv -- EdgeRef -> EdgeRef
@@ -129,6 +130,49 @@ newQE = do
     { qeTable = qetbref
     , qeSize = sizeref
     }
+
+mapQEM :: QE s a -> (EdgeRef -> ST s a -> ST s b) -> ST s (QE s b)
+mapQEM qeds mf = do
+  let sizeref = qeSize qeds
+      qetbref = qeTable qeds
+  size <- readSTRef sizeref
+  qetb <- readSTRef qetbref
+
+  rv <- do
+    (_, bnd) <- getBounds $ qeTable1A qetb
+    tb1 <- copyArray $ qeTable1A qetb
+    tb2 <- copyArray $ qeTable2A qetb
+    info0 <- newArray_ (0, bnd)
+    info1 <- newArray_ (0, bnd)
+    info2 <- newArray_ (0, bnd)
+    info3 <- newArray_ (0, bnd)
+    qetbref <- newSTRef $ QEtb
+      { qeTable1A = tb1
+      , qeTable2A = tb2
+      , qeInfo0A = info0
+      , qeInfo1A = info1
+      , qeInfo2A = info2
+      , qeInfo3A = info3
+      }
+    sizeref <- newSTRef size
+    return $ QE
+      { qeTable = qetbref
+      , qeSize = sizeref
+      }
+  forM_ [0..size-1] $ \i -> do
+    let refs = map (\r -> (i, r, Normal)) [Rot0, Rot1, Rot2, Rot3]
+    forM_ refs $ \e -> do
+      b <- mf e (getData qeds e)
+      putData rv e b
+    return ()
+  return rv
+ where
+  copyArray a = do
+    (s, e) <- getBounds a
+    rv <- newArray_ (s, e)
+    forM_ [s..e] $ \i -> do
+      readArray a i >>= writeArray rv i
+    return rv
 
 makeEdge :: QE s a -> ST s EdgeRef
 makeEdge qeds = do
