@@ -1,6 +1,7 @@
 
 module Merch.Race.Data
   ( Settlement(..)
+  , SettlementType(..)
   , Item(..)
   , Price(..)
   , Distance(..)
@@ -15,6 +16,9 @@ import Data.Ratio
 
 newtype Settlement
   = Settlement String
+  deriving (Eq, Ord, Show, Read)
+newtype SettlementType
+  = SettlementType String
   deriving (Eq, Ord, Show, Read)
 newtype Item
   = Item String
