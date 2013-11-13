@@ -37,6 +37,8 @@ module Merch.Race.Hex
   , nearby
   , distance
 
+  , position
+
   , toOffset
   , fromOffset
   ) where
@@ -115,3 +117,18 @@ distance :: HexCoord -> HexCoord -> Int
 distance (HexCoord (x1, z1)) (HexCoord (x2, z2)) =
   (abs(x1 - x2) + abs(z1 - z2) +
     abs(x1 + z1 - x2 - z2)) `div` 2
+
+{- Determine the position of the center of a hex.
+   The distance between hexes is considered to be
+   1.0.  The hex at (HexCoord (0,0)) is centered
+   on (0.0,0.0).  -}
+position :: Fractional n => HexCoord -> (n, n)
+position (HexCoord (xi, zi)) = (xp, yp)
+ where
+  x = fromIntegral xi
+  z = fromIntegral zi
+  xp = (x * 0.75) / half_sqrt3
+  yp = (x / 2) + z
+half_sqrt3 :: Fractional n => n
+half_sqrt3 = (1.732050807568877293527446341505 / 2)
+
