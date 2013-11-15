@@ -10,6 +10,7 @@ module Merch.Race.Data
   , ItemSet(..)
   , ProdCons(..)
   , ProdConsId(..)
+  , Terrain(..)
   ) where
 
 import Data.Ratio
@@ -158,3 +159,12 @@ instance Integral Day where
      (q, r) = a `divMod` b
   toInteger (Day a) = toInteger a
 
+data Terrain
+ = Sea
+ | Freshwater
+ | Coast
+ | Plains
+ | Forest
+ | Hill
+ | Mountain
+ deriving(Show, Read, Eq, Ord, Enum)
