@@ -39,6 +39,20 @@ class Monad m => MarketM m where
   mkGetAllSettlements :: m [Settlement]
   mkGetAllItems :: m [Item]
   mkGetSurplus :: Settlement -> Item -> m (Ratio Integer) -- can be negative for a deficit
+  -- the PID controller settings.
+  {- The center price.  The PID outputs a signed value, but
+     the price should be a positive value.  So we need to
+     adjust this by adding the center price below.  -}
+  mkGetCenterPrice :: m Price
+  {- PID tunables.  THe value kp is the proportionality
+     constant, ki is the integral constant, kd is the
+     derivative constant.  We expect the signal to be
+     noisy (due to randomness in production and
+     consumption) so we should have a very low derivative
+     constant and a somewhat high integral constant.  -}
+  mkGetKP :: m (Ratio Integer)
+  mkGetKI :: m (Ratio Integer)
+  mkGetKD :: m (Ratio Integer)
   -- the PID controller needs to retain these variables
   -- across days.
   mkGetPreviousError :: Settlement -> Item -> m (Ratio Integer)
@@ -47,21 +61,6 @@ class Monad m => MarketM m where
   mkSetIntegral :: Settlement -> Item -> (Ratio Integer) -> m ()
   -- The PID outputs the desired market price.
   mkSetTargetPrice :: Settlement -> Item -> Price -> m ()
-
-{- Settings for the PID.  -}
-{- The center price.  The PID outputs a signed value, but
-   the price should be a positive value.  So we need to
-   adjust this by adding the center price below.  -}
-centerPrice :: Price
-centerPrice = 500
-{- PID tunables.  THe value kp is the proportionality
-   constant, ki is the integral constant, kd is the
-   derivative constant.  We expect the signal to be
-   noisy (due to randomness in production and
-   consumption) so we should have a very low derivative
-   constant and a somewhat high integral constant.  -}
-kp, ki, kd :: Ratio Integer
-kp = 0.25 ; ki = 1.0 ; kd = 0.05
 
 {- A PID controller is:
    previousError = 0
@@ -82,6 +81,7 @@ marketInit :: MarketM m => m ()
 marketInit = do
   settlements <- mkGetAllSettlements
   items <- mkGetAllItems
+  centerPrice <- mkGetCenterPrice
   forM_ [(s,i)|s <- settlements, i <- items] $ \(settlement, item) -> do
     mkSetPreviousError settlement item 0
     mkSetIntegral settlement item 0
@@ -91,6 +91,10 @@ market :: MarketM m => m ()
 market = do
   settlements <- mkGetAllSettlements
   items <- mkGetAllItems
+  centerPrice <- mkGetCenterPrice
+  kp <- mkGetKP
+  ki <- mkGetKI
+  kd <- mkGetKD
   forM_ [(s,i)|s <- settlements, i <- items] $ \(settlement, item) -> do
     stockpile <- mkGetSurplus settlement item
     -- The error is the negation of the stockpile, since
