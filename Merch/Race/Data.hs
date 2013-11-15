@@ -11,6 +11,7 @@ module Merch.Race.Data
   , ProdCons(..)
   , ProdConsId(..)
   , Terrain(..)
+  , NameGenerator(..)
   ) where
 
 import Data.Ratio
@@ -168,3 +169,9 @@ data Terrain
  | Hill
  | Mountain
  deriving(Show, Read, Eq, Ord, Enum)
+
+data NameGenerator
+  = NGString String
+  | NGConcat [NameGenerator]
+  | NGDistribute [(NameGenerator, Int)]
+  deriving(Show, Read)
