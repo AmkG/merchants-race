@@ -35,6 +35,7 @@ executable merchrace
                ,  Merch.Race.CMerch
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
+               ,  Merch.Race.DrawingCombinators
                ,  Merch.Race.Graphics
                ,  Merch.Race.Hex
                ,  Merch.Race.ItemSetPrice

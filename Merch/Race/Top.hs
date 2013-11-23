@@ -7,6 +7,7 @@ module Merch.Race.Top
   , GameResources
   ) where
 
+import qualified Merch.Race.DrawingCombinators as Draw
 import Merch.Race.Graphics
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
@@ -14,7 +15,6 @@ import Merch.Race.Ruleset.Load
 import Paths_merchrace
 
 import Data.IORef
-import qualified Graphics.DrawingCombinators as Draw
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 

@@ -1,6 +1,7 @@
 
 module Main(main) where
 
+import qualified Merch.Race.DrawingCombinators as Draw
 import Merch.Race.Graphics
 import Merch.Race.Top
 
@@ -8,7 +9,6 @@ import Paths_merchrace
 
 import Data.List
 import Data.Monoid
-import qualified Graphics.DrawingCombinators as Draw
 import Graphics.DrawingCombinators(Image, (%%))
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
