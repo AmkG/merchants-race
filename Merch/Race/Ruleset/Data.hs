@@ -20,7 +20,7 @@ data Ruleset
     , settlementtypemap :: Map SettlementType SettlementTypeDesc
     , namegeneratormaybe :: Maybe NameGenerator
     , settlementgeneratorlist :: [(Int, SettlementType)]
-    , difficultymap :: Map String DifficultyDesc
+    , difficultymap :: Map Difficulty DifficultyDesc
     }
   deriving (Show, Read)
 emptyRuleset = Ruleset
@@ -75,4 +75,3 @@ emptyDifficultyDesc = DifficultyDesc
                       , centerprice = 500
                       , pidsettings = (0,0,0)
                       }
-

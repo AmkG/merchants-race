@@ -12,6 +12,7 @@ module Merch.Race.Data
   , ProdConsId(..)
   , Terrain(..)
   , NameGenerator(..)
+  , Difficulty(..)
   ) where
 
 import Data.Ratio
@@ -60,6 +61,9 @@ data ProdCons
   deriving (Show, Read)
 newtype ProdConsId
   = ProdConsId Integer
+  deriving (Eq, Ord, Show, Read)
+newtype Difficulty
+  = Difficulty String
   deriving (Eq, Ord, Show, Read)
 
 {- Boilerplate.  Avoid using GeneralizedNewtypeDeriving to
