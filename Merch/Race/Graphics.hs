@@ -85,8 +85,11 @@ translateMouseToScreen (GLUT.Position xi yi) = do
       smaller
         | wi < hi   = w
         | otherwise = h
-      xv = ((2 * x) / smaller) - 1
-      yv = ((2 * (h - y)) / smaller) - 1
+      (xadj, yadj)
+        | wi < hi   = (1    , h / w)
+        | otherwise = (w / h, 1    )
+      xv = ((2 * x) / smaller) - xadj
+      yv = ((2 * (h - y)) / smaller) - yadj
   return (xv, yv)
 
 type KeyDownFunc = Char -> IO ()
