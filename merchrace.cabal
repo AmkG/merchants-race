@@ -21,7 +21,7 @@ executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, containers, astar, OpenGL
                ,  SDL, SDL-image, SDL-ttf, Noise
-               ,  random
+               ,  parsec, random
   other-modules:  Math.Geom.Delaunay
                ,  Math.Geom.QuadEdge
                ,  Math.Geom.QuadEdge.Data
@@ -34,3 +34,5 @@ executable merchrace
                ,  Merch.Race.MapGen
                ,  Merch.Race.Market
                ,  Merch.Race.ProdCons
+               ,  Merch.Race.Ruleset.Data
+               ,  Merch.Race.Ruleset.Parser
