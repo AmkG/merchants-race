@@ -119,6 +119,8 @@ type TopDeclaration = Ruleset -> Ruleset
 topDecl :: Parser TopDeclaration
 topDecl = itemDecl
       <|> settlementTypeDecl
+      <|> nameGeneratorDecl
+      <|> settlementGeneratorDecl
 -- TODO: other top declarations
 
 itemDecl = do
@@ -172,6 +174,19 @@ settlementTypeDecl = do
     ts <- many1 $ enwhitespace terrain
     char '}'
     return $ \d -> d { stterrain = ts }
+nameGeneratorDecl = do
+  enwhitespace $ keyword "nameGenerator"
+  ng <- nameGenerator
+  return $ \r -> r { namegeneratormaybe = Just ng }
+settlementGeneratorDecl = do
+  enwhitespace $ keyword "settlementGenerator"
+  enwhitespace $ char '{'
+  ists <- many $ enwhitespace $ do
+    num <- enwhitespace int
+    st <- enwhitespace cstring
+    return $ (num, SettlementType st)
+  char '}'
+  return $ \r -> r { settlementgeneratorlist = ists }
 
 description = do
   enwhitespace $ keyword "description"
@@ -208,6 +223,7 @@ prodCons = scheduled
     return $ Probability prob is
 itemSet = anyItemSet
       <|> directItemSet
+      <?> "itemset"
  where
   anyItemSet = do
     enwhitespace $ keyword "any"
@@ -232,6 +248,7 @@ craftsman = do
   enwhitespace $ string "->"
   out <- itemSet
   return $ Craftsman inp out
+ <?> "craftsman"
 terrain = (keyword "sea"        >> return Sea)
       <|> (keyword "freshwater" >> return Freshwater)
       <|> (keyword "coast"      >> return Coast)
@@ -239,3 +256,34 @@ terrain = (keyword "sea"        >> return Sea)
       <|> (keyword "forest"     >> return Forest)
       <|> (keyword "hill"       >> return Hill)
       <|> (keyword "mountain"   >> return Mountain)
+nameGenerator = ngstring
+            <|> ngconcat
+            <|> ngany
+            <|> distribute
+            <?> "name generator"
+ where
+  ngstring = do
+    s <- cstring
+    return $ NGString s
+  ngconcat = do
+    enwhitespace $ keyword "concat"
+    enwhitespace $ char '{'
+    ngs <- many $ enwhitespace nameGenerator
+    char '}'
+    return $ NGConcat ngs
+  ngany = do
+    enwhitespace $ keyword "any"
+    enwhitespace $ char '{'
+    ngs <- many $ enwhitespace nameGenerator
+    char '}'
+    let ones = 1:ones
+    return $ NGDistribute $ zip ngs ones
+  distribute = do
+    enwhitespace $ keyword "distribute"
+    enwhitespace $ char '{'
+    ngis <- many $ enwhitespace $ do
+      i <- enwhitespace int
+      ng <- nameGenerator
+      return (ng, i)
+    char '}'
+    return  $ NGDistribute ngis
