@@ -24,6 +24,7 @@ extra-source-files:
 executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, containers, cpphs, astar, OpenGL
+               ,  GLUT
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  parsec, random
   other-modules:  Math.Geom.Delaunay
@@ -33,6 +34,7 @@ executable merchrace
                ,  Merch.Race.CMerch
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
+               ,  Merch.Race.Graphics.Init
                ,  Merch.Race.Hex
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen

@@ -1,12 +1,14 @@
 
 module Main(main) where
 
+import Merch.Race.Graphics.Init
 import qualified Merch.Race.Ruleset as Ruleset
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
 
 import Paths_merchrace
 
+import qualified Graphics.UI.GLUT as GLUT
 import System.Exit
 import System.IO.Error
 
@@ -38,10 +40,7 @@ gameLoop :: Ruleset -> IO ()
 gameLoop r = do
   -- TODO: Actually operate the game
   putStrLn "Merchant's Race!"
+  GLUT.mainLoop
   return ()
 
--- Initialize the graphics system
-beginGraphics :: IO () -> IO ()
-beginGraphics = id -- TODO
-
-main = beginGraphics core
+main = initializeGraphics core
