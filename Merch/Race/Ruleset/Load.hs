@@ -20,7 +20,6 @@ loadRuleset dir = do
   h <- openFile filename ReadMode
   dat <- hGetContents h
   pdat <- runCpphs opts filename dat
-  putStrLn $ pdat
   case parse parseRuleset filename pdat of
     Left e  -> fail $ show e
     Right r -> return r
