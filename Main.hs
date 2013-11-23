@@ -37,7 +37,7 @@ core = do
 reportError :: Draw.Font -> String -> IO ()
 reportError font e = do
   -- Create the error message image.
-  let elines = lines e
+  let elines = lines (e ++ "\n(Press ESCAPE to exit)")
       rawtexts = map (Draw.text font) elines
       texts = map translate $ zip rawtexts [0..]
        where
