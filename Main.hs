@@ -2,9 +2,7 @@
 module Main(main) where
 
 import Merch.Race.Graphics
-import qualified Merch.Race.Ruleset as Ruleset
-import Merch.Race.Ruleset(Ruleset)
-import Merch.Race.Ruleset.Load
+import Merch.Race.Top
 
 import Paths_merchrace
 
@@ -15,23 +13,16 @@ import Graphics.DrawingCombinators(Image, (%%))
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 import System.Exit
-import System.IO.Error
-
--- attempt to load the ruleset.
-tryLoadRuleset :: IO (Either String Ruleset)
-tryLoadRuleset = do
-  dir <- getDataFileName "ruleset"
-  catch (loadRuleset dir >>= return . Right)
-        (return . Left . show)
 
 core :: IO ()
 core = do
-  ers <- tryLoadRuleset
-  fontfile <- getDataFileName "FreeSans.ttf"
-  font <- Draw.openFont fontfile
+  ers <- tryLoadResources
   case ers of
-    Left e  -> reportError font e
-    Right r -> gameLoop font r
+    Left e  -> do
+      catch (do font <- getDataFileName "FreeSans.ttf" >>= Draw.openFont
+                reportError font e)
+            (\_ -> do putStrLn e)
+    Right r -> mainGameLoop r
 
 -- Report an error loading ruleset
 reportError :: Draw.Font -> String -> IO ()
@@ -53,16 +44,5 @@ reportError font e = do
   displayFunc $= display
   GLUT.mainLoop
   exitWith $ ExitFailure 1
-
--- Main game loop
-gameLoop :: Draw.Font -> Ruleset -> IO ()
-gameLoop font r = do
-  -- TODO: Setup callbacks
-  let top = Draw.text font "Merchant's Race"
-      display aspect = do
-        Draw.render top
-  displayFunc $= display
-  GLUT.mainLoop
-  return ()
 
 main = initializeGraphics core

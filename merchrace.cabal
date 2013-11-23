@@ -45,4 +45,5 @@ executable merchrace
                ,  Merch.Race.Ruleset.Data
                ,  Merch.Race.Ruleset.Load
                ,  Merch.Race.Ruleset.Parser
+               ,  Merch.Race.Top
                ,  Paths_merchrace
