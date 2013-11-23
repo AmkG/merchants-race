@@ -18,13 +18,14 @@ data-files: ruleset/difficulties.txt
           , ruleset/names.txt
           , ruleset/ruleset.txt
           , ruleset/settlements.txt
+          , FreeSans.ttf
 extra-source-files:
   README, Math/Geom/DelaunayTest.hs, runmerchrace
 
 executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, containers, cpphs, astar, OpenGL
-               ,  GLUT
+               ,  GLUT, graphics-drawingcombinators
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  parsec, random
   other-modules:  Math.Geom.Delaunay

@@ -5,6 +5,7 @@ module Merch.Race.Graphics.Init
 
 import Control.Exception
 
+import qualified Graphics.Rendering.OpenGL as GL
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 
@@ -24,6 +25,10 @@ keyboarder _ GLUT.Down _ _ = do
 closer :: GLUT.CloseCallback
 closer = do
   GLUT.leaveMainLoop
+reshaper :: GLUT.ReshapeCallback
+reshaper size = do
+  GL.viewport $= (GLUT.Position 0 0, size)
+  GLUT.postRedisplay Nothing
 
 graphInit :: IO GraphicsState
 graphInit = do
@@ -32,6 +37,8 @@ graphInit = do
   GLUT.displayCallback $= displayer
   GLUT.keyboardMouseCallback $= Just keyboarder
   GLUT.closeCallback $= Just closer
+  GLUT.reshapeCallback $= Just reshaper
+  GLUT.actionOnWindowClose $= GLUT.ContinueExectuion
   GLUT.fullScreen
   return ()
 
