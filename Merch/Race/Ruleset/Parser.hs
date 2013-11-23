@@ -19,12 +19,14 @@ parseRuleset :: Parser Ruleset
 parseRuleset = do
   whitespace
   ds <- many (enwhitespace topDecl)
+  eof
   return $ foldl' (\r d -> d r) emptyRuleset ds
 
 whitespace :: Parser ()
-whitespace = lineDirective
-         <|> (many space >> return ())
-         <?> "whitespace"
+whitespace = do
+  many ((space >> return ()) <|> lineDirective)
+  return ()
+ <?> "whitespace"
  where
   lineDirective = do
     keyword "#line"
@@ -36,6 +38,7 @@ whitespace = lineDirective
     newline
     setPosition $ newPos s l 1
     return ()
+  space = newline <|> horizspace
   horizspace = satisfy (\c -> any (c==) " \t\v\r")
   newline = char '\n'
 
