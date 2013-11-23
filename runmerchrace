@@ -1,0 +1,8 @@
+#! /bin/sh
+
+cabal build
+if !(test $? '=' 0); then
+ exit $?
+fi
+merchrace_datadir=. dist/build/merchrace/merchrace $@
+

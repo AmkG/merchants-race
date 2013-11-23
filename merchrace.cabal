@@ -19,7 +19,7 @@ data-files: ruleset/difficulties.txt
           , ruleset/ruleset.txt
           , ruleset/settlements.txt
 extra-source-files:
-  README,  Math/Geom/DelaunayTest.hs
+  README, Math/Geom/DelaunayTest.hs, runmerchrace
 
 executable merchrace
   main-is:        Main.hs
