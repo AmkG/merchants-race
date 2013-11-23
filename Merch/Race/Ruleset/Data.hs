@@ -59,6 +59,7 @@ data DifficultyDesc
     , interestrate :: Rational
     , centerprice :: Price
     , pidsettings :: (Rational, Rational, Rational) -- kp ki kd
+    , startingloan :: Price
     }
   deriving (Show, Read)
 emptyDifficultyDesc = DifficultyDesc
@@ -70,8 +71,9 @@ emptyDifficultyDesc = DifficultyDesc
                       , marketlunchcost = (0, ItemSet [] [])
                       , publunchcost = (0, ItemSet [] [])
                       , banditprobability = Map.empty
-                      , permeability = 0
-                      , interestrate = 0
+                      , permeability = 0.1
+                      , interestrate = 0.1
                       , centerprice = 500
-                      , pidsettings = (0,0,0)
+                      , pidsettings = (0.1,0.5,0.001)
+                      , startingloan = 1000
                       }

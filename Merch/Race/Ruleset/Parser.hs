@@ -121,7 +121,7 @@ topDecl = itemDecl
       <|> settlementTypeDecl
       <|> nameGeneratorDecl
       <|> settlementGeneratorDecl
--- TODO: other top declarations
+      <|> difficultyDecl
 
 itemDecl = do
   enwhitespace $ keyword "item"
@@ -187,6 +187,78 @@ settlementGeneratorDecl = do
     return $ (num, SettlementType st)
   char '}'
   return $ \r -> r { settlementgeneratorlist = ists }
+difficultyDecl = do
+  enwhitespace $ keyword "difficulty"
+  name <- enwhitespace cstring
+  let dname = Difficulty name
+  enwhitespace $ char '{'
+  ds <- many $ enwhitespace subDecl
+  char '}'
+  let raw = emptyDifficultyDesc
+      named = raw { difficultyname = name }
+      final = foldl' (\d f -> f d) named ds
+  return $ \r -> r { difficultymap = Map.insert dname final $ difficultymap r }
+ where
+  subDecl = ddesc
+        <|> cartUpgradeCost
+        <|> supplyCost
+        <|> innCost
+        <|> marketLunchCost
+        <|> pubLunchCost
+        <|> banditProbability
+        <|> permeabilityDecl
+        <|> interestRate
+        <|> priceSettings
+        <|> startingLoan
+
+  ddesc = do
+    s <- description
+    return $ \d -> d { difficultydesc = s }
+  costing kw func = do
+    enwhitespace $ keyword kw
+    r <- enwhitespace $ ratio
+    is <- itemSet
+    return $ func (r, is)
+  cartUpgradeCost =
+    costing "cartUpgradeCost" $ \r d -> d {cartupgradecost = r}
+  supplyCost =
+    costing "supplyCost" $ \r d -> d {supplycost = r}
+  innCost =
+    costing "innCost" $ \r d -> d {inncost = r}
+  marketLunchCost =
+    costing "marketLunchCost" $ \r d -> d {marketlunchcost = r}
+  pubLunchCost =
+    costing "pubLunchCost" $ \r d -> d {publunchcost = r}
+  banditProbability = do
+    enwhitespace $ keyword "banditProbability"
+    enwhitespace $ char '{'
+    ls <- many $ enwhitespace $ do
+      t <- enwhitespace terrain
+      r <- ratio
+      return $ (t, r)
+    char '}'
+    return $ \d -> d {banditprobability = Map.fromList ls}
+  ratioDecl kw func = do
+    enwhitespace $ keyword kw
+    r <- ratio
+    return $ func r
+  permeabilityDecl =
+    ratioDecl "permeability" $ \r d -> d {permeability = r}
+  interestRate =
+    ratioDecl "interestRate" $ \r d -> d {interestrate = r}
+  priceSettings = do
+    enwhitespace $ keyword "priceSettings"
+    cp <- enwhitespace int
+    kp <- enwhitespace ratio
+    ki <- enwhitespace ratio
+    kd <- ratio
+    return $ \d -> d { centerprice = fromIntegral cp
+                     , pidsettings = (kp,ki,kd)
+                     }
+  startingLoan = do
+    enwhitespace $ keyword "startingLoan"
+    l <- int
+    return $ \d -> d { startingloan = fromIntegral l }
 
 description = do
   enwhitespace $ keyword "description"
