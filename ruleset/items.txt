@@ -1,0 +1,26 @@
+
+item "Grain" {
+  description {
+    "The seed of various domesticated grasses, "
+    "grain is the staple food of most people."
+  }
+}
+item "Cured Meat" {
+  description {
+    "Meat that has been treated "
+    "to prevent it from spoiling."
+  }
+}
+item "Dried Fish" {
+  description {
+    "Fish that has been dried under the sun, "
+    "to make them practically tranportable."
+  }
+}
+item "Fruit" {
+  description {
+    "The product of various fruiting trees and plants, "
+    "the sweetness of fruit makes them a desired "
+    "delicacy."
+  }
+}

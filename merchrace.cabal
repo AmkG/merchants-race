@@ -13,13 +13,17 @@ build-type:       Simple
 cabal-version:    >= 1.2
 stability:        alpha
 bug-reports:      almkglor@gmail.com
-data-files:
+data-files: ruleset/difficulties.txt
+          , ruleset/items.txt
+          , ruleset/names.txt
+          , ruleset/ruleset.txt
+          , ruleset/settlements.txt
 extra-source-files:
   README,  Math/Geom/DelaunayTest.hs
 
 executable merchrace
   main-is:        Main.hs
-  build-depends:  base >= 3, containers, astar, OpenGL
+  build-depends:  base >= 3, containers, cpphs, astar, OpenGL
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  parsec, random
   other-modules:  Math.Geom.Delaunay
@@ -34,5 +38,8 @@ executable merchrace
                ,  Merch.Race.MapGen
                ,  Merch.Race.Market
                ,  Merch.Race.ProdCons
+               ,  Merch.Race.Ruleset
                ,  Merch.Race.Ruleset.Data
+               ,  Merch.Race.Ruleset.Load
                ,  Merch.Race.Ruleset.Parser
+               ,  Paths_merchrace

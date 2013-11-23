@@ -1,0 +1,91 @@
+
+nameGenerator any {
+  /* British place name generation.  */
+  concat {
+    distribute {
+      25 ""
+       1 "inver"
+       2 "lin"
+       2 "kin"
+       4 "nor"
+       4 "suf"
+       4 "ast"
+       1 "aber"
+       1 "strath"
+       5 "dun"
+       2 "bre"
+       3 "brad"
+       2 "dal"
+    }
+    any {
+      "lun"
+      "blen"
+      "hart"
+      "ford"
+      "foss"
+      "glen"
+      "keld"
+      "streat"
+      "thorp"
+      "whel"
+      "gilyng"
+      "thorn"
+      "wort"
+      "wilhem"
+    }
+    distribute {
+      2 "wick"
+      3 "port"
+      1 "mouth"
+      4 "chester"
+      3 "ham"
+      2 "field"
+      2 "dale"
+      1 "bury"
+      3 "combe"
+      2 "cott"
+      3 "ney"
+    }
+  }
+  /* German place name generation.  */
+  concat {
+    distribute {
+      25 ""
+       4 "alt"
+       2 "grossen"
+       3 "ober"
+       3 "klein"
+       2 "nien"
+       2 "nieder"
+       2 "grun"
+    }
+    any {
+      "inn"
+      "saltz"
+      "pass"
+      "regen"
+      "wernige"
+      "mann"
+      "hans"
+      "wuster"
+    }
+    distribute {
+      1 "gau"
+      1 "werth"
+      1 "bach"
+      1 "bruck"
+      3 "burg"
+      3 "hausen"
+      2 "dorf"
+      2 "felde"
+      2 "heim"
+    }
+    distribute {
+      25 ""
+       1 "-hof"
+       1 "-siedlung"
+       1 "-ausbau"
+    }
+  }
+}
+

@@ -1,0 +1,7 @@
+
+/* Ruleset for Merchant's Race.  */
+#include "items.txt"
+#include "settlements.txt"
+#include "names.txt"
+#include "difficulties.txt"
+
