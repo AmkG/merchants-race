@@ -26,6 +26,7 @@ executable merchrace
   main-is:        Main.hs
   build-depends:  base >= 3, containers, cpphs, astar, OpenGL
                ,  GLUT, graphics-drawingcombinators
+               ,  stb-image == 0.2.*, bitmap == 0.0.2
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  parsec, random
   other-modules:  Math.Geom.Delaunay
