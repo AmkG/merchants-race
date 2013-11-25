@@ -41,6 +41,8 @@ executable merchrace
                ,  Merch.Race.Hex
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen
+               ,  Merch.Race.MapGen.Island
+               ,  Merch.Race.MapGen.Monad
                ,  Merch.Race.Market
                ,  Merch.Race.ProdCons
                ,  Merch.Race.Ruleset
