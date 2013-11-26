@@ -40,10 +40,44 @@ mainGame :: GameResources -> Screen
 mainGame gr aspect = core
  where
   bc = mkButtonConfig [ButtonFont $ grFont gr]
+  mkButton = button bc
+  exitButton = mkButton (0, -0.65) "Exit" exitScreen
+  newButton  = mkButton (0, 0.6) "New Game"   (notImplemented gr coreScreen)
+  loadButton = mkButton (0, 0.3) "Load Game"  (notImplemented gr coreScreen)
+  hiButton   = mkButton (0, 0.0) "High Score" (notImplemented gr coreScreen)
+  buttons = mconcat [exitButton, newButton, loadButton, hiButton]
+
+  top = buttons
+
   core (KeyDown _ '\ESC')  = GLUT.leaveMainLoop >> return NoTopReaction
   core ReDo                = do
-    let disp = button bc (0, -0.75) "Exit" exitScreen
-    return $ SetDrawing disp
+    return $ SetDrawing top
+  core _                   = return NoTopReaction
+
+  coreScreen aspect'
+    | aspect == aspect' = core
+    | otherwise         = \_ -> return $ SetScreen $ mainGame gr
+
+notImplemented :: GameResources -> Screen -> Screen
+notImplemented gr src aspect = core
+ where
+  font = grFont gr
+  bc = mkButtonConfig [ButtonFont font]
+  exitButton = button bc (0, -0.75) "Exit" src
+  msgText = "This part is not yet implemented!"
+  message = Draw.text font msgText
+  width = Draw.textWidth font msgText
+  messageCentered = Draw.translate (-1, 0)
+                 %% Draw.scale (2/width) (2/width)
+                 %% message
+
+  top = mconcat
+        [ exitButton
+        , drawingStatic messageCentered
+        ]
+
+  core (KeyDown _ '\ESC')  = return $ SetScreen src
+  core ReDo                = return $ SetDrawing top
   core _                   = return NoTopReaction
 
 exitScreen :: Screen
