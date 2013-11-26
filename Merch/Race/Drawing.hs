@@ -20,6 +20,7 @@ import Control.Applicative
 import Control.Concurrent(yield)
 import Control.Concurrent.MVar
 import Control.Exception
+import Control.Monad
 import Data.IORef
 import Data.List
 import Data.Monoid
@@ -146,6 +147,12 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
     -- compute starting image
     sendTop ReDo
 
+    -- set up variables for mouse movement
+    -- current item and handler that mouse is on.
+    curvar <- newIORef Nothing
+    -- whether objects are grabbed.
+    grabvar <- newIORef False
+
     -- function definitions
     let displayer = do
           GLUT.clear [GLUT.ColorBuffer]
@@ -183,10 +190,75 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
         keyboarder k ks mod pos = do
           return ()
 
-        -- TODO
-        mover pos = do
-          (x,y) <- translateMouseToScreen pos
-          return ()
+        mover pos = translateMouseToScreen pos >>= moverLoop
+        moverLoop (x,y) = do
+          grab <- readIORef grabvar
+          if grab
+           -- currently grabbed
+           then do
+            Just (curid, curfun) <- readIORef curvar
+            Drawing im <- readIORef dispvar
+            let actualCurItem = Draw.sample im (x, y)
+                isOut = case actualCurItem of
+                  Nothing      -> True
+                  Just (id, _) -> id /= curid
+            handleReaction $ curfun $ if isOut then MouseMoveOut else MouseMove
+            -- retry grab
+            grab <- readIORef grabvar
+            -- got ungrabbed?  Resend message.
+            when (not grab) $ moverLoop (x,y)
+
+           -- currently ungrabbed
+           else do
+            cur <- readIORef curvar
+            Drawing im <- readIORef dispvar
+            let act = Draw.sample im (x, y)
+            case cur of
+              Just (curid, curfun) -> do
+                case act of
+                  Just (actid, actfun) -> do
+                    -- both a previous and a current exist.
+                    if curid /= actid
+                     then do
+                      handleReaction $ curfun MouseMoveOut
+                      -- retry grab
+                      grab <- readIORef grabvar
+                      when (not grab) $ do
+                        -- pass it to current handler
+                        writeIORef curvar Nothing
+                        moverLoop (x,y)
+                     else do
+                      handleReaction $ curfun MouseMove
+                  Nothing -> do
+                    -- a previous exists but not a current.
+                    handleReaction $ curfun MouseMoveOut
+                    -- retry grab
+                    grab <- readIORef grabvar
+                    when (not grab) $ do
+                      -- pass it to current handler
+                      writeIORef curvar Nothing
+                      moverLoop (x, y)
+              Nothing -> do
+                case act of
+                  Just (actid, actfun) -> do
+                    -- some item contains it.
+                    handleReaction $ actfun MouseMove
+                    -- check if item changed in reaction
+                    -- to MouseMove.
+                    Drawing im <- readIORef dispvar
+                    writeIORef curvar $ Draw.sample im (x,y)
+                  -- nothing in particular
+                  Nothing -> return ()
+
+        handleReaction rs = forM_ rs handle1
+        handle1 Grab       = writeIORef grabvar True
+        handle1 Ungrab     = writeIORef grabvar False
+        handle1 (Modify d) = do
+          writeIORef dispvar d
+          GLUT.postRedisplay Nothing
+        handle1 (Replace s) = do
+          writeIORef screenvar s
+          sendTop ReDo
 
         idler = yield >> sendTop Idle
 
