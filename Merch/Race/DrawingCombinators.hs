@@ -11,6 +11,7 @@ module Merch.Race.DrawingCombinators
   , rotate
   , scale
   , inverse
+  , (%%)
 
   , Image
   , render
