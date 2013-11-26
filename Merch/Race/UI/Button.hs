@@ -81,9 +81,22 @@ button bc (x,y) l screen = buttonGeneric idle hover press screen
   w = fw / 2; nw = negate w
   h = fh / 2; nh = negate h
 
-  -- TODO: use curve-edge rectangles
-  innerBox = Draw.rectangle (nw+0.01, nh+0.01) (w-0.01, h-0.01)
-  outerBox = Draw.rectangle (nw     , nh     ) (w     , h     )
+  -- Set up sizes for curves.
+  outerRadiusBase = 0.03
+  diffBase = 0.01
+  outerRadius
+    | min fw fh < outerRadiusBase = min fw fh
+    | otherwise                   = outerRadiusBase
+  diff
+    | outerRadius - diffBase < 0  = diffBase
+    | otherwise                   = outerRadius / 2
+  innerRadius = outerRadius - diff
+
+  -- Generate curved-corner rectangles.
+  innerBox
+    = roundedRectangle innerRadius (nw+diff, nh+diff) (w-diff,h-diff)
+  outerBox
+    = roundedRectangle outerRadius (nw     , nh     ) (w     ,h     )
 
   innerBoxMoved
     = Draw.translate (x,y) %% innerBox
@@ -112,3 +125,28 @@ button bc (x,y) l screen = buttonGeneric idle hover press screen
       , Draw.tint white outerBoxMoved
       ]
 
+-- Rounded rectangle implementation
+roundedRectangle :: Draw.R -> (Draw.R, Draw.R) -> (Draw.R, Draw.R) -> Draw.Image Any
+roundedRectangle radius (x1, y1) (x2, y2)
+  = core (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)
+ where
+  core lx ly ux uy
+    = mconcat
+      [ circles
+      , tall
+      , wide
+      ]
+   where
+    lxr = lx + radius
+    lyr = ly + radius
+    uxr = ux - radius
+    uyr = uy - radius
+    tall = Draw.rectangle (lxr, ly) (uxr, uy)
+    wide = Draw.rectangle (lx, lyr) (ux, uyr)
+    circleSized = Draw.scale radius radius %% Draw.circle
+    circles = mconcat
+              [ Draw.translate (lxr, lyr) %% circleSized
+              , Draw.translate (lxr, uyr) %% circleSized
+              , Draw.translate (uxr, uyr) %% circleSized
+              , Draw.translate (uxr, lyr) %% circleSized
+              ]
