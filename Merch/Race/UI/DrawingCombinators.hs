@@ -1,6 +1,6 @@
 {- Wrapper for Graphics.DrawingCombinators.   -}
 
-module Merch.Race.DrawingCombinators
+module Merch.Race.UI.DrawingCombinators
   ( Affine
   , R
   , R2

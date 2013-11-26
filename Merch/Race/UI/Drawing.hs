@@ -1,6 +1,6 @@
 
 {- Drawing system, based around graphics-drawingcombinators.  -}
-module Merch.Race.Drawing
+module Merch.Race.UI.Drawing
   ( Drawing(..)
   , drawing
   , drawingStatic
@@ -14,7 +14,7 @@ module Merch.Race.Drawing
   , initialScreen
   ) where
 
-import qualified Merch.Race.DrawingCombinators as Draw
+import qualified Merch.Race.UI.DrawingCombinators as Draw
 
 import Control.Applicative
 import Control.Concurrent(yield, threadDelay)

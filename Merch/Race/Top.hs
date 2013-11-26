@@ -7,9 +7,9 @@ module Merch.Race.Top
   , GameResources
   ) where
 
-import qualified Merch.Race.DrawingCombinators as Draw
-import Merch.Race.DrawingCombinators((%%))
-import Merch.Race.Drawing
+import qualified Merch.Race.UI.DrawingCombinators as Draw
+import Merch.Race.UI.DrawingCombinators((%%))
+import Merch.Race.UI.Drawing
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
 

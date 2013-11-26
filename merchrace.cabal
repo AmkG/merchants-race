@@ -36,8 +36,6 @@ executable merchrace
                ,  Merch.Race.CMerch
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
-               ,  Merch.Race.Drawing
-               ,  Merch.Race.DrawingCombinators
                ,  Merch.Race.Hex
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen
@@ -50,4 +48,6 @@ executable merchrace
                ,  Merch.Race.Ruleset.Load
                ,  Merch.Race.Ruleset.Parser
                ,  Merch.Race.Top
+               ,  Merch.Race.UI.Drawing
+               ,  Merch.Race.UI.DrawingCombinators
                ,  Paths_merchrace

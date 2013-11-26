@@ -1,8 +1,8 @@
 
 module Main(main) where
 
-import qualified Merch.Race.DrawingCombinators as Draw
-import Merch.Race.Drawing
+import qualified Merch.Race.UI.DrawingCombinators as Draw
+import Merch.Race.UI.Drawing
 import Merch.Race.Top
 
 import Paths_merchrace
