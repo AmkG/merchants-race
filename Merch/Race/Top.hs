@@ -51,13 +51,30 @@ reacting y = idleState
   boxMoved = Draw.translate (0.0, y) %% boxRaw
   gray = Draw.Color 0.5 0.5 0.5 1
   white = Draw.Color 1 1 1 1
+  yellow = Draw.Color 1 1 0.5 1
 
   idleBox = Draw.tint gray boxMoved
+  activeBox = Draw.tint white boxMoved
+  pressBox = Draw.tint yellow boxMoved
+
   idleStateF MouseMove    = [Modify activeState]
   idleStateF _            = []
   idleState = drawing idleStateF idleBox
 
-  activeBox = Draw.tint white boxMoved
   activeStateF MouseMoveOut = [Modify idleState]
+  activeStateF MouseDown    = [Grab, Modify pressState]
   activeStateF _            = []
   activeState = drawing activeStateF activeBox
+
+  pressStateF MouseMoveOut = [Modify pressOffState]
+  pressStateF MouseUp      = [Ungrab, Replace exitScreen]
+  pressStateF _            = []
+  pressState = drawing pressStateF pressBox
+
+  pressOffStateF MouseMove = [Modify pressState]
+  pressOffStateF MouseUp   = [Ungrab, Modify idleState]
+  pressOffStateF _         = []
+  pressOffState = drawing pressOffStateF idleBox
+
+  exitScreen :: Screen
+  exitScreen _ _ = GLUT.leaveMainLoop >> return NoTopReaction

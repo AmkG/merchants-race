@@ -63,6 +63,7 @@ data MouseEvent
   | MouseMoveOut --  Mouse moved outside the drawing
   | MouseDown --     Mouse button up->down event
   | MouseUp --       Mouse button down->up event
+  deriving (Show, Read, Eq)
 
 -- What a Drawing does in response to having mice
 -- crawl over it.
@@ -137,12 +138,14 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
               writeIORef dispvar d
               GLUT.postRedisplay Nothing
             SetScreen  s  -> do
-              writeIORef screenvar s
-              sz <- get GLUT.windowSize
-              let aspect = computeAspect sz
-                  top = s aspect
-              writeIORef topvar top
-              sendTop ReDo
+              setScreen s
+        setScreen s = do
+          writeIORef screenvar s
+          sz <- get GLUT.windowSize
+          let aspect = computeAspect sz
+              top = s aspect
+          writeIORef topvar top
+          sendTop ReDo
 
     -- compute starting image
     sendTop ReDo
@@ -150,8 +153,8 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
     -- set up variables for mouse movement
     -- current item and handler that mouse is on.
     curvar <- newIORef Nothing
-    -- whether objects are grabbed.
-    grabvar <- newIORef False
+    -- the mouse location when the mouse was grabbed.
+    grabvar <- newIORef Nothing
 
     -- function definitions
     let displayer = do
@@ -186,30 +189,61 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
           = sendTop $ SKeyDown (glutModToModifier mod) c
         keyboarder (GLUT.SpecialKey c) GLUT.Up   mod _
           = sendTop $ SKeyUp   (glutModToModifier mod) c
-        -- TODO: Mouse up and down
+        keyboarder (GLUT.MouseButton GLUT.LeftButton) GLUT.Up   _ pos
+          = mouseButtonSend pos MouseUp
+        keyboarder (GLUT.MouseButton GLUT.LeftButton) GLUT.Down _ pos
+          = mouseButtonSend pos MouseDown
         keyboarder k ks mod pos = do
           return ()
 
+        mouseButtonSend :: GLUT.Position -> MouseEvent -> IO ()
+        mouseButtonSend pos msg = do
+          (x,y) <- translateMouseToScreen pos
+          moverLoop (x, y)
+          cur <- readIORef curvar
+          case cur of
+            Just (_, curfun) -> do
+              handleReaction curfun msg (x,y)
+            Nothing          -> return ()
+
         mover pos = translateMouseToScreen pos >>= moverLoop
         moverLoop (x,y) = do
+          trygrab <- readIORef grabvar
+          case trygrab of
+            Just (gx,gy) -> do
+              Drawing im <- readIORef dispvar
+              case Draw.sample im (gx,gy) of
+                Nothing -> writeIORef grabvar Nothing
+                _       -> return ()
+            Nothing      -> return ()
+
           grab <- readIORef grabvar
-          if grab
+          case grab of
            -- currently grabbed
-           then do
-            Just (curid, curfun) <- readIORef curvar
+           Just (gx, gy) -> do
             Drawing im <- readIORef dispvar
-            let actualCurItem = Draw.sample im (x, y)
+            let Just (curid, curfun) = Draw.sample im (gx,gy)
+                actualCurItem = Draw.sample im (x, y)
                 isOut = case actualCurItem of
                   Nothing      -> True
                   Just (id, _) -> id /= curid
-            handleReaction $ curfun $ if isOut then MouseMoveOut else MouseMove
-            -- retry grab
-            grab <- readIORef grabvar
+                msg
+                  | isOut     = MouseMoveOut
+                  | otherwise = MouseMove
+                fun = case actualCurItem of
+                  Nothing          -> curfun
+                  Just (_, actfun)
+                    | isOut        -> curfun
+                    | otherwise    -> actfun
+            writeIORef curvar $ Just (curid, fun)
+            handleReaction fun msg (x,y)
             -- got ungrabbed?  Resend message.
-            when (not grab) $ moverLoop (x,y)
+            whenNotGrab $ do
+              curvarUpdate(x,y)
+              moverLoop (x,y)
 
            -- currently ungrabbed
-           else do
+           Nothing -> do
             cur <- readIORef curvar
             Drawing im <- readIORef dispvar
             let act = Draw.sample im (x, y)
@@ -220,21 +254,19 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
                     -- both a previous and a current exist.
                     if curid /= actid
                      then do
-                      handleReaction $ curfun MouseMoveOut
-                      -- retry grab
-                      grab <- readIORef grabvar
-                      when (not grab) $ do
+                      handleReaction curfun MouseMoveOut (x,y)
+                      whenNotGrab $ do
                         -- pass it to current handler
                         writeIORef curvar Nothing
                         moverLoop (x,y)
                      else do
-                      handleReaction $ curfun MouseMove
+                      handleReaction curfun MouseMove (x,y)
+                      curvarUpdate(x,y)
                   Nothing -> do
                     -- a previous exists but not a current.
-                    handleReaction $ curfun MouseMoveOut
+                    handleReaction curfun MouseMoveOut (x,y)
                     -- retry grab
-                    grab <- readIORef grabvar
-                    when (not grab) $ do
+                    whenNotGrab $ do
                       -- pass it to current handler
                       writeIORef curvar Nothing
                       moverLoop (x, y)
@@ -242,23 +274,30 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
                 case act of
                   Just (actid, actfun) -> do
                     -- some item contains it.
-                    handleReaction $ actfun MouseMove
-                    -- check if item changed in reaction
-                    -- to MouseMove.
-                    Drawing im <- readIORef dispvar
-                    writeIORef curvar $ Draw.sample im (x,y)
+                    handleReaction actfun MouseMove (x,y)
+                    curvarUpdate(x,y)
                   -- nothing in particular
                   Nothing -> return ()
 
-        handleReaction rs = forM_ rs handle1
-        handle1 Grab       = writeIORef grabvar True
-        handle1 Ungrab     = writeIORef grabvar False
-        handle1 (Modify d) = do
+        handleReaction rf msg pos = forM_ (rf msg) (handle1 msg pos)
+        handle1 msg (x,y) Grab       = writeIORef grabvar $ Just (x,y)
+        handle1 msg (x,y) Ungrab     = writeIORef grabvar Nothing
+        handle1 msg (x,y) (Modify d) = do
           writeIORef dispvar d
           GLUT.postRedisplay Nothing
-        handle1 (Replace s) = do
-          writeIORef screenvar s
-          sendTop ReDo
+        handle1 msg (x,y) (Replace s) = do
+          writeIORef curvar Nothing
+          writeIORef grabvar Nothing
+          setScreen s
+
+        curvarUpdate(x,y) = do
+          Drawing im <- readIORef dispvar
+          writeIORef curvar $ Draw.sample im (x,y)
+        whenNotGrab act = do
+          grab <- readIORef grabvar
+          case grab of
+            Nothing -> act
+            _       -> return ()
 
         idler = yield >> sendTop Idle
 
