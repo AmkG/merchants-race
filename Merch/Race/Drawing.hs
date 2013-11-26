@@ -171,8 +171,15 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
           writeIORef topvar top
           sendTop ReDo
 
-        -- TODO
-        keyboarder (GLUT.Char '\ESC') GLUT.Down _ _ = GLUT.leaveMainLoop
+        keyboarder (GLUT.Char c)       GLUT.Down mod _
+          = sendTop $ KeyDown  (glutModToModifier mod) c
+        keyboarder (GLUT.Char c)       GLUT.Up   mod _
+          = sendTop $ KeyUp    (glutModToModifier mod) c
+        keyboarder (GLUT.SpecialKey c) GLUT.Down mod _
+          = sendTop $ SKeyDown (glutModToModifier mod) c
+        keyboarder (GLUT.SpecialKey c) GLUT.Up   mod _
+          = sendTop $ SKeyUp   (glutModToModifier mod) c
+        -- TODO: Mouse up and down
         keyboarder k ks mod pos = do
           return ()
 
@@ -192,6 +199,12 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
     GLUT.passiveMotionCallback $= Just mover
     GLUT.actionOnWindowClose $= GLUT.ContinueExectuion
     GLUT.mainLoop
+
+glutModToModifier :: GLUT.Modifiers -> [Modifier]
+glutModToModifier m
+  = [Ctrl  | GLUT.Down <- return $ GLUT.ctrl  m]
+ ++ [Shift | GLUT.Down <- return $ GLUT.shift m]
+ ++ [Alt   | GLUT.Down <- return $ GLUT.alt   m]
 
 computeAspect :: GLUT.Size -> Draw.R
 computeAspect (GLUT.Size w h) = fromIntegral w / fromIntegral h
