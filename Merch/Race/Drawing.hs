@@ -17,7 +17,7 @@ module Merch.Race.Drawing
 import qualified Merch.Race.DrawingCombinators as Draw
 
 import Control.Applicative
-import Control.Concurrent(yield)
+import Control.Concurrent(yield, threadDelay)
 import Control.Concurrent.MVar
 import Control.Exception
 import Control.Monad
@@ -299,7 +299,7 @@ initialScreen startscreen = bracket graphInit graphDeinit $ \_ -> core
             Nothing -> act
             _       -> return ()
 
-        idler = yield >> sendTop Idle
+        idler = threadDelay 1 >> yield >> sendTop Idle
 
     GLUT.displayCallback $= displayer
     GLUT.closeCallback $= Just GLUT.leaveMainLoop
