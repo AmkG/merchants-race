@@ -2,7 +2,7 @@
 module Main(main) where
 
 import qualified Merch.Race.DrawingCombinators as Draw
-import Merch.Race.Graphics
+import Merch.Race.Drawing
 import Merch.Race.Top
 
 import Paths_merchrace
@@ -14,15 +14,15 @@ import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 import System.Exit
 
-core :: IO ()
-core = do
+core :: () -> IO ()
+core () = do
   ers <- tryLoadResources
   case ers of
     Left e  -> do
       catch (do font <- getDataFileName "FreeSans.ttf" >>= Draw.openFont
                 reportError font e)
             (\_ -> do putStrLn e)
-    Right r -> mainGameLoop r
+    Right r -> initialScreen $ mainGame r
 
 -- Report an error loading ruleset
 reportError :: Draw.Font -> String -> IO ()
@@ -38,11 +38,12 @@ reportError font e = do
       text = foldl' mappend mempty texts
       scaledtext = Draw.scale (2/textwidth) (2/textwidth) %% text
       top = Draw.translate (-1, 0) %% scaledtext
+  -- Create the drawing.
+      topdrawing = drawingStatic top
+      screenfunc aspect ReDo                = return $ SetDrawing topdrawing
+      screenfunc aspect (KeyDown _ '\ESC')  = GLUT.leaveMainLoop >> return NoTopReaction
+      screenfunc aspect _                   = return NoTopReaction
   -- Display the error message.
-  let display aspect = do
-        Draw.render top
-  displayFunc $= display
-  GLUT.mainLoop
-  exitWith $ ExitFailure 1
+  initialScreen screenfunc
 
-main = initializeGraphics core
+main = core ()

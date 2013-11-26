@@ -3,12 +3,12 @@
 
 module Merch.Race.Top
   ( tryLoadResources
-  , mainGameLoop
+  , mainGame
   , GameResources
   ) where
 
 import qualified Merch.Race.DrawingCombinators as Draw
-import Merch.Race.Graphics
+import Merch.Race.Drawing
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
 
@@ -33,19 +33,8 @@ loadResources = do
   font <- getDataFileName "FreeSans.ttf" >>= Draw.openFont
   return $ GR ruleset font
 
-mainGameLoop :: GameResources -> IO ()
-mainGameLoop gr = do
-  -- TODO: make a useable graphics system.
-  ptvar <- newIORef (0,0)
-  let mouser pt = do
-        writeIORef ptvar pt
-        GLUT.postRedisplay Nothing
-      displayer _ = do
-        pt <- readIORef ptvar
-        let im = Draw.line (0,0) pt
-        Draw.render im
-  displayFunc $= displayer
-  mouseMoveFunc $= mouser
-
-  GLUT.mainLoop
-  return ()
+mainGame :: GameResources -> Screen
+mainGame gr aspect = core
+ where
+  core (KeyDown _ '\ESC')  = GLUT.leaveMainLoop >> return NoTopReaction
+  core _                   = return NoTopReaction
