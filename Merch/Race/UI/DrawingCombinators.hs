@@ -23,6 +23,7 @@ module Merch.Race.UI.DrawingCombinators
   , circle
   , convexPoly
   , bezierCurve
+  , rectangle -- create a rectangle
 
   , Color(..)
   , modulate
@@ -164,3 +165,17 @@ sprite s = unsafeOpenGLImage render pick
   pick (x,y)
     | negate xr <= x && x <= xr && negate yr <= y && y <= yr = Any True
     | otherwise                                              = Any False
+
+-------
+
+rectangle :: (R, R) -> (R, R) -> Image Any
+rectangle (x1, y1) (x2, y2)
+  = core (min x1 x2) (min y1 y2) (max x1 x2) (max y1 y2)
+ where
+  core lx ly ux uy
+    = convexPoly
+      [ (lx, ly)
+      , (ux, ly)
+      , (ux, uy)
+      , (lx, uy)
+      ]
