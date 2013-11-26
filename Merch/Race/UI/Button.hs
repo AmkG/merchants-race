@@ -58,7 +58,7 @@ mkButtonConfig = foldl' process start
           { bcFont = undefined
           , bcWidth = 0.8
           , bcHeight = 0.12
-          , bcTextHeight = 0.05
+          , bcTextHeight = 0.04
           }
   process c (ButtonFont f)       = c { bcFont = f }
   process c (ButtonWidth w)      = c { bcWidth = w }
