@@ -6,19 +6,19 @@ module Merch.Race.Data.TMap
   , lookupTMap -- TMap -> HexCoord -> (Terrain, Bool)
   , settlementsTMap -- TMap -> [(Settlement, SettlementType, HexCoord)]
   , settlementAtTMap -- Monad m => TMap -> HexCoord -> m (Settlement, SettlementType)
-  , distanceTMap -- TMap -> Settlement -> Settlement -> Int
+  , distanceTMap -- TMap -> Settlement -> Settlement -> Distance
 
   , MTMap
-  , boundsMTMap -- MTMap -> IO (HexCoord, HexCoord)
   , newMTMap -- (HexCoord, HexCoord) -> IO MTMap
-{-
+  , boundsMTMap -- MTMap -> IO (HexCoord, HexCoord)
   , readMTMap -- MTMap -> HexCoord -> IO (Terrain, Bool)
   , writeMTMap -- MTMap -> HexCoord -> (Terrain, Bool) -> IO ()
   , settlementsMTMap -- MTMap -> IO [(Settlement, SettlementType, HexCoord)]
   , settlementAtMTMap -- MTMap -> HexCoord -> IO (Maybe (Settlement, SettlementType))
   , addSettlementMTMap -- MTMap -> Settlement -> SettlementType -> HexCoord -> IO ()
-  , readDistanceMTMap -- MTMap -> Settlement -> Settlement -> IO Int
-  , writeDistanceMTMap -- MTMap -> Settlement -> Settlement -> Int -> IO ()
+  , readDistanceMTMap -- MTMap -> Settlement -> Settlement -> IO Distance
+  , writeDistanceMTMap -- MTMap -> Settlement -> Settlement -> Distance -> IO ()
+{-
 
   , hPutMTMap -- Handle -> MTMap -> IO ()
   , hGetMTMap -- Handle -> IO MTMap
@@ -31,6 +31,7 @@ module Merch.Race.Data.TMap
 import Merch.Race.Data
 import Merch.Race.Hex
 
+import Control.Monad
 import Data.Array.Unboxed
 import Data.Array.IO
 import Data.Bits
@@ -46,7 +47,7 @@ data TMap
     { boundsTMap :: (HexCoord, HexCoord)
     , arrTMap :: UArray Int Word8
     , settlemapTMap :: Map HexCoord (Settlement, SettlementType)
-    , distmapTMap :: Map (Settlement, Settlement) Int
+    , distmapTMap :: Map (Settlement, Settlement) Distance
     }
 lookupTMap :: TMap -> HexCoord -> (Terrain, Bool)
 lookupTMap tmap h = final
@@ -108,7 +109,7 @@ settlementAtTMap :: Monad m =>
                     TMap -> HexCoord -> m (Settlement, SettlementType)
 settlementAtTMap tmap h = Map.lookup h $ settlemapTMap tmap
 
-distanceTMap :: TMap -> Settlement -> Settlement -> Int
+distanceTMap :: TMap -> Settlement -> Settlement -> Distance
 distanceTMap tmap a b
   | a < b     = core (a,b)
   | otherwise = core (b,a)
@@ -122,7 +123,7 @@ data MTMap
     { boundsMTMapP :: (HexCoord, HexCoord)
     , arrMTMap :: IOUArray Int Word8
     , settlemapvarMTMap :: IORef (Map HexCoord (Settlement, SettlementType))
-    , distmapvarMTMap :: IORef (Map (Settlement, Settlement) Int)
+    , distmapvarMTMap :: IORef (Map (Settlement, Settlement) Distance)
     }
 
 newMTMap :: (HexCoord, HexCoord) -> IO MTMap
@@ -141,6 +142,67 @@ newMTMap b = do
 
 boundsMTMap :: MTMap -> IO (HexCoord, HexCoord)
 boundsMTMap = return . boundsMTMapP
+
+readMTMap :: MTMap -> HexCoord -> IO (Terrain, Bool)
+readMTMap mtmap h = do
+  let b = boundsMTMapP mtmap
+  if inRange b h
+   then do
+    let rawI = index b h
+        (i, sel) = rawI `divMod` 2
+    word <- readArray (arrMTMap mtmap) i
+    let tword = unmarshal word
+        func
+          | sel == 0  = fst
+          | otherwise = snd
+    return $ func tword
+   else do
+    return (Sea, False)
+writeMTMap :: MTMap -> HexCoord -> (Terrain, Bool) -> IO ()
+writeMTMap mtmap h tr = do
+  let b = boundsMTMapP mtmap
+  when (inRange b h) $ do
+    let rawI = index b h
+        (i, sel) = rawI `divMod` 2
+    word <- readArray (arrMTMap mtmap) i
+    let tword = unmarshal word
+        unproj
+          | sel == 0  =  \ (_, b) a -> (a, b)
+          | otherwise =  \ (a, _) b -> (a, b)
+        tword' = unproj tword tr
+    writeArray (arrMTMap mtmap) i (marshal tword')
+
+settlementsMTMap :: MTMap -> IO [(Settlement, SettlementType, HexCoord)]
+settlementsMTMap mtmap = do
+  settlemap <- readIORef $ settlemapvarMTMap mtmap
+  return $ map (\ (h, (s, st)) -> (s, st, h)) $ Map.toList settlemap
+
+settlementAtMTMap :: MTMap -> HexCoord -> IO (Maybe (Settlement, SettlementType))
+settlementAtMTMap mtmap h = do
+  settlemap <- readIORef $ settlemapvarMTMap mtmap
+  return $ Map.lookup h settlemap
+
+addSettlementMTMap :: MTMap -> Settlement -> SettlementType -> HexCoord -> IO ()
+addSettlementMTMap mtmap s st h = do
+  modifyIORef (settlemapvarMTMap mtmap) $
+    Map.insert h (s,st)
+
+readDistanceMTMap :: MTMap -> Settlement -> Settlement -> IO Distance
+readDistanceMTMap mtmap a b
+  | a < b     = core (a,b)
+  | otherwise = core (b,a)
+ where
+  core k = readIORef (distmapvarMTMap mtmap)
+       >>= return . fromJust . Map.lookup k
+
+writeDistanceMTMap :: MTMap -> Settlement -> Settlement -> Distance -> IO ()
+writeDistanceMTMap mtmap a b i
+  | a < b     = core (a, b)
+  | otherwise = core (b, a)
+ where
+  core k = do
+    modifyIORef (distmapvarMTMap mtmap) $
+      Map.insert k i
 
 freezeMTMap :: MTMap -> IO TMap
 freezeMTMap mtmap = do
