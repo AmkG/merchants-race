@@ -43,6 +43,8 @@ module Merch.Race.Hex
   , fromOffset
   ) where
 
+import Merch.Race.Data.Serialize
+
 import Data.Array
 
 newtype HexCoord
@@ -83,6 +85,9 @@ instance Ix HexCoord where
   range (l, h) = map fromOffset $ range (toOffset l, toOffset h)
   index (l, h) i = index (toOffset l, toOffset h) (toOffset i)
   inRange (l, h) i = inRange (toOffset l, toOffset h) (toOffset i)
+instance Serialize HexCoord where
+  hPut = hPutConvert $ \ (HexCoord x) -> x
+  hGet = hGetConvert $ \ x            -> (HexCoord x)
 
 {- Returns a list of hex coordinates directly
    adjacent to the given hex.  -}

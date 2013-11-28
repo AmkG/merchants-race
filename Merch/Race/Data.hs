@@ -15,6 +15,8 @@ module Merch.Race.Data
   , Difficulty(..)
   ) where
 
+import Merch.Race.Data.Serialize
+
 import Data.Ratio
 
 newtype Settlement
@@ -179,3 +181,29 @@ data NameGenerator
   | NGConcat [NameGenerator]
   | NGDistribute [(NameGenerator, Int)]
   deriving(Show, Read)
+
+{- Serialization.  -}
+instance Serialize Settlement where
+  hPut = hPutConvert $ \ (Settlement s) -> s
+  hGet = hGetConvert $ \ s              -> (Settlement s)
+instance Serialize SettlementType where
+  hPut = hPutConvert $ \ (SettlementType s) -> s
+  hGet = hGetConvert $ \ s                  -> (SettlementType s)
+instance Serialize Item where
+  hPut = hPutConvert $ \ (Item s) -> s
+  hGet = hGetConvert $ \ s        -> (Item s)
+instance Serialize Price where
+  hPut = hPutConvert $ \ (Price i) -> i
+  hGet = hGetConvert $ \ i         -> (Price i)
+instance Serialize Distance where
+  hPut = hPutConvert $ \ (Distance i) -> i
+  hGet = hGetConvert $ \ i            -> (Distance i)
+instance Serialize Day where
+  hPut = hPutConvert $ \ (Day i) -> i
+  hGet = hGetConvert $ \ i       -> (Day i)
+instance Serialize ProdConsId where
+  hPut = hPutConvert $ \ (ProdConsId i) -> i
+  hGet = hGetConvert $ \ i              -> (ProdConsId i)
+instance Serialize Difficulty where
+  hPut = hPutConvert $ \ (Difficulty i) -> i
+  hGet = hGetConvert $ \ i              -> (Difficulty i)
