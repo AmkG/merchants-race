@@ -18,17 +18,13 @@ module Merch.Race.Data.TMap
   , addSettlementMTMap -- MTMap -> Settlement -> SettlementType -> HexCoord -> IO ()
   , readDistanceMTMap -- MTMap -> Settlement -> Settlement -> IO Distance
   , writeDistanceMTMap -- MTMap -> Settlement -> Settlement -> Distance -> IO ()
-{-
 
-  , hPutMTMap -- Handle -> MTMap -> IO ()
-  , hGetMTMap -- Handle -> IO MTMap
-
--}
   , freezeMTMap -- MTMap -> IO TMap
   , unfreezeTMap -- TMap -> IO MTMap
   ) where
 
 import Merch.Race.Data
+import Merch.Race.Data.Serialize
 import Merch.Race.Hex
 
 import Control.Monad
@@ -115,6 +111,26 @@ distanceTMap tmap a b
   | otherwise = core (b,a)
  where
   core k = fromJust $ Map.lookup k (distmapTMap tmap)
+
+instance Serialize TMap where
+  hPut h tm = do
+    hPut h $ boundsTMap tm
+    let iarr = arrTMap tm
+    arr <- thaw iarr
+    hPutArray h arr $ rangeSize $ bounds iarr
+    hPut h $ settlemapTMap tm
+    hPut h $ distmapTMap tm
+  hGet h = do
+    let tm = TMap { }
+    tm <- hGet h >>= \v -> return $ tm { boundsTMap = v }
+    let rawI = rangeSize $ boundsTMap tm
+        i = (rawI + 1) `div` 2
+    arr <- newArray (0, i - 1) 0
+    hGetArray h arr i
+    tm <- freeze arr >>= \v -> return $ tm { arrTMap = v }
+    tm <- hGet h >>= \v -> return $ tm { settlemapTMap = v }
+    tm <- hGet h >>= \v -> return $ tm { distmapTMap = v }
+    return tm
 
 -------------------------------------------------------------------------------
 
