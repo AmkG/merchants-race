@@ -38,18 +38,21 @@ minimap tm hidden = adjustment %% total
   supercenter = (negate $ (lowx + highx) / 2, negate $ (lowy + highy) / 2)
   adjustment = scale adjustx adjusty `mappend` translate supercenter
 
-  hs = filter (not . flip Set.member hidden) $ range (lb, ub)
+  hs() = filter (not . flip Set.member hidden) $ range (lb, ub)
 
-  total = mconcat
-          [ forceSample (First Nothing) settlements
-          , forceSample (First Nothing) roads
-          , tiles
-          , forceSample (First Nothing) background
-          ]
+  total = mconcat (map makeAll $ hs ())
+          `mappend` noCoord background
+  noCoord = forceSample (First Nothing)
+
+  makeAll h = mconcat
+              [ noCoord $ makeSett h
+              , noCoord $ makeRoad h
+              , makeHex h
+              ]
+
   background = tint backgroundColor $ rectangle (lowx, lowy) (highx, highy)
   backgroundColor = Color 0 0 0 1
 
-  settlements = mconcat $ map makeSett hs
   makeSett :: HexCoord -> Image Any
   makeSett h
     | not s     = mempty
@@ -62,7 +65,6 @@ minimap tm hidden = adjustment %% total
     movedcircle = adjust %% circle
   settlementColor = Color 0.25 0.25 1.0  1
 
-  roads = mconcat $ map makeRoad hs
   makeRoad :: HexCoord -> Image Any
   makeRoad h
     | not r     = mempty
@@ -77,7 +79,6 @@ minimap tm hidden = adjustment %% total
       return $ line c0 (halfway c0 $ position n)
   roadColor = Color 0.25 0.25 0   1
 
-  tiles = mconcat $ map makeHex hs
   makeHex :: HexCoord -> Image (First HexCoord)
   makeHex h = fmap toH $ tint color $ convexPoly coords
    where
