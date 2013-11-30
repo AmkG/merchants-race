@@ -46,7 +46,8 @@ minimap tm hidden = adjustment %% total
           , tiles
           , forceSample (First Nothing) background
           ]
-  background = rectangle (lowx, lowy) (highx, highy)
+  background = tint backgroundColor $ rectangle (lowx, lowy) (highx, highy)
+  backgroundColor = Color 0 0 0 1
 
   settlements = mconcat $ map makeSett hs
   makeSett :: HexCoord -> Image Any
