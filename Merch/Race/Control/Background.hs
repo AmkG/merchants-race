@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 
 {- Execution of code in a background thread.
    The foreground thread can sample any available
@@ -29,7 +30,7 @@ data BackState s
   | SampleAvailable s
   | Finished s
   | RequestSample
-  | Excepted Exception
+  | Excepted SomeException
   | Aborted
 
 newtype BackM s a
@@ -38,7 +39,7 @@ newtype BackM s a
     }
 data Event s
   = Put s (IO (Event s))
-  | EExcepted Exception
+  | EExcepted SomeException
   | Finish s
 
 instance Monad (BackM s) where
