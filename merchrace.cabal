@@ -55,6 +55,7 @@ executable merchrace
                ,  Merch.Race.Ruleset.Load
                ,  Merch.Race.Ruleset.Parser
                ,  Merch.Race.Top
+               ,  Merch.Race.Top.MapGen
                ,  Merch.Race.UI.Button
                ,  Merch.Race.UI.Drawing
                ,  Merch.Race.UI.DrawingCombinators

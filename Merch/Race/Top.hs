@@ -10,6 +10,7 @@ module Merch.Race.Top
 import Merch.Race.GameResources
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
+import Merch.Race.Top.MapGen
 import Merch.Race.UI.Button
 import qualified Merch.Race.UI.DrawingCombinators as Draw
 import Merch.Race.UI.DrawingCombinators((%%))
@@ -37,7 +38,7 @@ mainGame gr aspect = core
   bc = mkButtonConfig [ButtonFont $ grFont gr]
   mkButton = button bc
   exitButton = mkButton (0, -0.65) "Exit" exitScreen
-  newButton  = mkButton (0, 0.6) "New Game"   (notImplemented gr coreScreen)
+  newButton  = mkButton (0, 0.6) "New Game"   $ newGameScreen gr
   loadButton = mkButton (0, 0.3) "Load Game"  (notImplemented gr coreScreen)
   hiButton   = mkButton (0, 0.0) "High Score" (notImplemented gr coreScreen)
   buttons = mconcat [exitButton, newButton, loadButton, hiButton]
@@ -77,3 +78,9 @@ notImplemented gr src aspect = core
 
 exitScreen :: Screen
 exitScreen aspect _  = GLUT.leaveMainLoop >> return NoTopReaction
+
+newGameScreen :: GameResources -> Screen
+newGameScreen gr _ _ = return $ SetScreen screen1
+ where
+  screen1 = mapgenScreen gr screen2 (mainGame gr)
+  screen2 = const (mainGame gr)
