@@ -39,7 +39,6 @@ landTotalRatio = 0.6
 
 drawIsland :: MapGenM m => m ()
 drawIsland = do
-  mgStep "Rendering island"
 
   -- Get map bounds
   (lb, ub) <- mgMapBounds
@@ -68,12 +67,14 @@ drawIsland = do
         (x,y) = position h
 
   -- Clear the map to freshwater.  20%
+  mgStep "Clearing the map to freshwater"
   forM_ (zip [1..] $ range (lb, ub)) $ \ (i, h) -> do
     mgProgress $ (fromIntegral i % fromIntegral totaltiles) * 0.20
     mgPutTerrain h Freshwater
     mgPutRoad h False
 
   -- Perform the actual drawing of the island. 50%
+  mgStep "Rendering island"
   let isWater h
         | inRange (lb,ub) h = mgGetTerrain h >>= return . (== Freshwater)
         | otherwise         = return False
@@ -105,12 +106,15 @@ drawIsland = do
                     q' = q >< Seq.fromList candidates'
                 draw i' q' done' maxp'
               -- don't draw
-              else draw i (q |> h) done maxp'
+              else do
+                mgProgress $ 0.20 + (i % ilandtiles) * 0.50
+                draw i (q |> h) done maxp'
   draw 0 (Seq.singleton center) Set.empty 0.0
   mgProgress 0.7
 
   -- Flood-fill the seas.
   -- First fill the edge tiles with freshwater. 5%
+  mgStep "Terminating land"
   let edgetiles = [fromOffset (x, y) | y <- [ly..hy], x <- [lx, hx]]
                ++ [fromOffset (x, y) | x <- [lx..hx], y <- [ly, hy]]
       numedgetiles = fromIntegral $ length edgetiles
@@ -120,6 +124,7 @@ drawIsland = do
     mgPutRoad h False
 
   -- Flood fill the seas starting from the lb corner.  25%
+  mgStep "Filling seas"
   let watertiles = fromIntegral $ totaltiles - landtiles
       flood i h toget = do
         mgProgress $ 0.75 + (i % watertiles) * 0.25
