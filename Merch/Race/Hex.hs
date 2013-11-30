@@ -29,6 +29,25 @@ as Ix will be a rectangular section:
          \      /
           \____/
 
+Hexes are defined by X and Z coordinates.  These
+increase like so:
+
+     ____        ____
+    /    \      /    \
+   / X = 0\____/      \
+   \ Z = 0/    \      /
+    \____/ X = 1\____/
+    /    \      /    \
+   /      \____/ X = 2\
+   \ Z = 1/    \      /
+    \____/      \____/
+    /    \      /    \
+   /      \____/      \
+   \ Z = 2/    \      /
+    \____/      \____/
+         \      /
+          \____/
+
 -}
 
 module Merch.Race.Hex
@@ -90,7 +109,10 @@ instance Serialize HexCoord where
   hGet = hGetConvert $ \ x            -> (HexCoord x)
 
 {- Returns a list of hex coordinates directly
-   adjacent to the given hex.  -}
+   adjacent to the given hex.  Given the
+   direction x is to the lower right and
+   z is downwards, the neighbors are in
+   counter-clockwise order.  -}
 neighbors :: HexCoord -> [HexCoord]
 neighbors (HexCoord (x,z)) =
   [ HexCoord (xp1, z  )
@@ -126,7 +148,11 @@ distance (HexCoord (x1, z1)) (HexCoord (x2, z2)) =
 {- Determine the position of the center of a hex.
    The distance between hexes is considered to be
    1.0.  The hex at (HexCoord (0,0)) is centered
-   on (0.0,0.0).  -}
+   on (0.0,0.0).
+
+   This assumes a typical "computer" coordinate
+   system, where screen X increases to the right
+   and screen Y increases downwards.  -}
 position :: Fractional n => HexCoord -> (n, n)
 position (HexCoord (xi, zi)) = (xp, yp)
  where
