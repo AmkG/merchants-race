@@ -15,11 +15,13 @@ import Merch.Race.UI.Button
 import qualified Merch.Race.UI.DrawingCombinators as Draw
 import Merch.Race.UI.DrawingCombinators((%%))
 import Merch.Race.UI.Drawing
+import Merch.Race.UI.Minimap
 
 import Paths_merchrace
 
 import Data.IORef
 import Data.Monoid
+import qualified Data.Set as Set
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 
@@ -83,4 +85,13 @@ newGameScreen :: GameResources -> Screen
 newGameScreen gr _ _ = return $ SetScreen screen1
  where
   screen1 = mapgenScreen gr screen2 (mainGame gr)
-  screen2 = const (mainGame gr)
+  screen2 tmap = displayTMap tmap
+
+  -- Temporary screen to just display the resulting map.
+  displayTMap tmap aspect = core
+   where
+    bc = mkButtonConfig [ButtonFont $ grFont gr]
+    drawing = drawingStatic $ minimap tmap Set.empty
+    core ReDo               = return $ SetDrawing drawing
+    core (KeyDown _ '\ESC') = return $ SetScreen $ mainGame gr
+    core _                  = return NoTopReaction
