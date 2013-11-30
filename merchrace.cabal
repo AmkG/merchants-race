@@ -34,6 +34,7 @@ executable merchrace
                ,  Math.Geom.QuadEdge.Data
                ,  Math.Geom.QuadEdge.Pure
                ,  Merch.Race.CMerch
+               ,  Merch.Race.Control.Background
                ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
                ,  Merch.Race.Data.Serialize
