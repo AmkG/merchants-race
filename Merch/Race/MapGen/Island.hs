@@ -21,21 +21,21 @@ import Math.Noise.Modules.Perlin
 
 perlinModule :: Int -> Perlin
 perlinModule = Perlin
-  1.0 -- Frequency
+  2.0 -- Frequency
   2.0 -- Lacunarity (frequency multiplier between successive octaves)
-  8 -- number of octaves
-  0.3 -- Persistence (amplitude multiplier between successive octaves)
+  5 -- number of octaves
+  0.8 -- Persistence (amplitude multiplier between successive octaves)
 
 perlinFunc :: Int -> (Double, Double) -> Double
 perlinFunc seed = func
  where
   mod = perlinModule seed
   func (x,y) = case getValue mod (x,y,0) of
-                 Just r  -> r
+                 Just r  -> abs r
                  Nothing -> 0
 
 landTotalRatio :: Rational
-landTotalRatio = 0.6
+landTotalRatio = 0.4
 
 drawIsland :: MapGenM m => m ()
 drawIsland = do
