@@ -35,7 +35,7 @@ minimap tm hidden = adjustment %% total
   (highx, highy) = position superub
   adjustx = 2 / (highx - lowy)
   adjusty = 2 / (highy - lowy)
-  supercenter = ((lowx + highx) / 2, (lowy + highy) / 2)
+  supercenter = (negate $ (lowx + highx) / 2, negate $ (lowy + highy) / 2)
   adjustment = scale adjustx adjusty `mappend` translate supercenter
 
   hs = filter (not . flip Set.member hidden) $ range (lb, ub)
