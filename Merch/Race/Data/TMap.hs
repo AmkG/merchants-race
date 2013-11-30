@@ -103,7 +103,11 @@ settlementsTMap tmap = map reformat $ Map.toList $ settlemapTMap tmap
 
 settlementAtTMap :: Monad m =>
                     TMap -> HexCoord -> m (Settlement, SettlementType)
-settlementAtTMap tmap h = Map.lookup h $ settlemapTMap tmap
+settlementAtTMap tmap h = do
+  let v = Map.lookup h $ settlemapTMap tmap
+  case v of
+    Just v  -> return v
+    Nothing -> fail "No settlement."
 
 distanceTMap :: TMap -> Settlement -> Settlement -> Distance
 distanceTMap tmap a b
