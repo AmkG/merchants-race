@@ -28,6 +28,7 @@ executable merchrace
                ,  GLUT, graphics-drawingcombinators
                ,  stb-image == 0.2.*, bitmap == 0.0.2
                ,  SDL, SDL-image, SDL-ttf, Noise
+               ,  mtl, array
                ,  parsec, random
   other-modules:  Math.Geom.Delaunay
                ,  Math.Geom.QuadEdge
