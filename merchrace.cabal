@@ -61,3 +61,5 @@ executable merchrace
                ,  Merch.Race.UI.DrawingCombinators
                ,  Merch.Race.UI.Minimap
                ,  Paths_merchrace
+
+  ghc-options: -O3 -threaded "-with-rtsopts=-N"
