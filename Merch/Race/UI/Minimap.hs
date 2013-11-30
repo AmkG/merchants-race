@@ -96,7 +96,7 @@ minimap tm hidden = adjustment %% total
     toH (Any True)  = First $ Just h
     toH (Any False) = First $ Nothing
 
-  terrainColor Sea        = Color 0.2 0.2 1.0  1
+  terrainColor Sea        = Color 0.1 0.1 0.9  1
   terrainColor Freshwater = Color 0.3 0.4 1.0  1
   terrainColor Coast      = Color 1.0 0.9 0.3  1
   terrainColor Plains     = Color 0.3 0.9 0.3  1
