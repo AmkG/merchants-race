@@ -7,6 +7,7 @@ module Merch.Race.Top
   , GameResources
   ) where
 
+import Merch.Race.GameResources
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
 import Merch.Race.UI.Button
@@ -21,12 +22,6 @@ import Data.Monoid
 import qualified Graphics.UI.GLUT as GLUT
 import Graphics.UI.GLUT(($=))
 
-data GameResources
-  = GR
-    { grRuleset :: Ruleset
-    , grFont :: Draw.Font
-    }
-
 tryLoadResources :: IO (Either String GameResources)
 tryLoadResources = catch (loadResources >>= return . Right)
                          (return . Left . show)
@@ -34,7 +29,7 @@ loadResources :: IO GameResources
 loadResources = do
   ruleset <- getDataFileName "ruleset" >>= loadRuleset
   font <- getDataFileName "FreeSans.ttf" >>= Draw.openFont
-  return $ GR ruleset font
+  return $ GameResources ruleset font
 
 mainGame :: GameResources -> Screen
 mainGame gr aspect = core

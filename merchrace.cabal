@@ -39,6 +39,7 @@ executable merchrace
                ,  Merch.Race.Data
                ,  Merch.Race.Data.Serialize
                ,  Merch.Race.Data.TMap
+               ,  Merch.Race.GameResources
                ,  Merch.Race.Hex
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen
