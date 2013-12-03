@@ -1,12 +1,15 @@
 
 module Main(main) where
 
+import Prelude hiding (catch)
+
 import qualified Merch.Race.UI.DrawingCombinators as Draw
 import Merch.Race.UI.Drawing
 import Merch.Race.Top
 
 import Paths_merchrace
 
+import Control.Exception
 import Data.List
 import Data.Monoid
 import Graphics.DrawingCombinators(Image, (%%))
@@ -21,7 +24,7 @@ core () = do
     Left e  -> do
       catch (do font <- getDataFileName "FreeSans.ttf" >>= Draw.openFont
                 reportError font e)
-            (\_ -> do putStrLn e)
+            ((\_ -> do putStrLn e) :: SomeException -> IO ())
     Right r -> initialScreen $ mainGame r
 
 -- Report an error loading ruleset

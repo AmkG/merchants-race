@@ -7,6 +7,8 @@ module Merch.Race.Top
   , GameResources
   ) where
 
+import Prelude hiding(catch)
+
 import Merch.Race.GameResources
 import Merch.Race.Ruleset(Ruleset)
 import Merch.Race.Ruleset.Load
@@ -19,6 +21,7 @@ import Merch.Race.UI.Minimap
 
 import Paths_merchrace
 
+import Control.Exception
 import Data.IORef
 import Data.Monoid
 import qualified Data.Set as Set
@@ -27,7 +30,7 @@ import Graphics.UI.GLUT(($=))
 
 tryLoadResources :: IO (Either String GameResources)
 tryLoadResources = catch (loadResources >>= return . Right)
-                         (return . Left . show)
+                         (return . Left . (show :: SomeException -> String))
 loadResources :: IO GameResources
 loadResources = do
   ruleset <- getDataFileName "ruleset" >>= loadRuleset
