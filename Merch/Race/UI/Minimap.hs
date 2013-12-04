@@ -64,9 +64,13 @@ minimapCore pre tm hidden = adjustment %% total
   (lb, ub) = boundsTMap tm
   superlb = fromOffset $ (\ (q,r) -> (q-1,r-1)) $ toOffset lb
   superub = fromOffset $ (\ (q,r) -> (q+1,r+1)) $ toOffset ub
-  (lowx, lowy)   = position superlb
-  (highx, highy) = position superub
-  adjustx = 2 / (highx - lowy)
+  -- Note: the superlb (0,0) has the lower x coordinate, but
+  -- the higher y coordinate, due to fact that in OpenGL,
+  -- y goes positive upwards, while in our Hex coordinate
+  -- system, it goes positive downwards.
+  (lowx, highy)  = position superlb
+  (highx, lowy)  = position superub
+  adjustx = 2 / (highx - lowx)
   adjusty = 2 / (highy - lowy)
   supercenter = (negate $ (lowx + highx) / 2, negate $ (lowy + highy) / 2)
   adjustment = scale adjustx adjusty `mappend` translate supercenter
