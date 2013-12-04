@@ -101,34 +101,54 @@ minimapCore pre tm hidden = adjustment %% total
       error "Merch.Race.UI.Minimap.minimapCore: Incorrect preparation."
     | otherwise                     =
       unsafeOpenGLImage terrainDraw terrainPick
-  terrainDraw tintColor = do
-    -- Grab the color arrray
-    withMVar (mpColorData pre) $ \p -> do
-      -- Fill the color array
-      forM_ (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
-        let rawColor
-              | Set.member h hidden = backgroundColor
-              | otherwise           = terrainColor $ fst $ lookupTMap tm h
-            color = modulate tintColor rawColor
-            (r,g,b,a) = normalizeColor color
-        forM_ ([0..5]) $ \ n -> do
-           pokeElemOff p (i * 24 + n * 4 + 0) r
-           pokeElemOff p (i * 24 + n * 4 + 1) g
-           pokeElemOff p (i * 24 + n * 4 + 2) b
-           pokeElemOff p (i * 24 + n * 4 + 3) a
-      -- Set up drawing
+  terrainDraw tintC = do
+    -- Generate normalized colors
+    let n = normalizeColor
+        seaColor        = n $ tintC `modulate` terrainColor Sea
+        freshwaterColor = n $ tintC `modulate` terrainColor Freshwater
+        coastColor      = n $ tintC `modulate` terrainColor Coast
+        plainsColor     = n $ tintC `modulate` terrainColor Plains
+        forestColor     = n $ tintC `modulate` terrainColor Forest
+        hillColor       = n $ tintC `modulate` terrainColor Hill
+        mountainColor   = n $ tintC `modulate` terrainColor Mountain
+        nTerrainColor Sea        = seaColor
+        nTerrainColor Freshwater = freshwaterColor
+        nTerrainColor Coast      = coastColor
+        nTerrainColor Plains     = plainsColor
+        nTerrainColor Forest     = forestColor
+        nTerrainColor Hill       = hillColor
+        nTerrainColor Mountain   = mountainColor
+        
+    -- Grab the color buffer object
+    withMVar (mpColorData pre) $ \colorBO -> do
+      -- prepare a new buffer.
+      GL.bindBuffer GL.ArrayBuffer $= Just colorBO
+      GL.bufferData GL.ArrayBuffer $= (mpColorSize pre, nullPtr, GL.StreamDraw)
+      -- fill the color buffer object.
+      let filler p = do
+            forM_ (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
+              let (r,g,b,a) = nTerrainColor $ fst $ lookupTMap tm h
+              forM_ ([0..5]) $ \ n -> do
+                 pokeElemOff p (i * 24 + n * 4 + 0) r
+                 pokeElemOff p (i * 24 + n * 4 + 1) g
+                 pokeElemOff p (i * 24 + n * 4 + 2) b
+                 pokeElemOff p (i * 24 + n * 4 + 3) a
+          errorer = fail . show
+      GL.withMappedBuffer GL.ArrayBuffer GL.WriteOnly filler errorer
+      -- Set up data
+      GL.arrayPointer GL.ColorArray $= GL.VertexArrayDescriptor
+        {-rgba-} 4 GL.UnsignedByte (fromIntegral $ 4 * sizeOf (0 :: GL.GLubyte)) nullPtr
+
       -- Enable arrays
       GL.clientState GL.VertexArray $= GL.Enabled
       GL.clientState GL.ColorArray $= GL.Enabled
-      -- Bind buffers
-      GL.bindBuffer GL.ArrayBuffer $= Nothing
-      GL.arrayPointer GL.ColorArray $= GL.VertexArrayDescriptor
-        {-rgba-} 4 GL.UnsignedByte (fromIntegral $ 4 * sizeOf (0 :: GL.GLubyte)) p
 
+      -- Bind vertices
       GL.bindBuffer GL.ArrayBuffer $= Just (mpHexVertices pre)
       GL.arrayPointer GL.VertexArray $= GL.VertexArrayDescriptor
         {-x,y-} 2 GL.Float (fromIntegral $ 2 * sizeOf (0 :: GL.GLfloat)) nullPtr
 
+      -- Bind element index
       GL.bindBuffer GL.ElementArrayBuffer $= Just (mpHexElements pre)
 
       -- DRAW!
@@ -150,8 +170,9 @@ data MinimapPrepare
     { mpBounds :: (HexCoord, HexCoord) -- Bounds of the TMap this prepared minimap can handle
     , mpHexVertices :: GL.BufferObject -- The vertex buffer object for hexes of this minimap
     , mpHexElements :: GL.BufferObject -- The indexes to draw for hexes
-    , mpNumElements :: GL.GLsizei --      Number of indexes to draw for all hexes
-    , mpColorData :: MVar (Ptr GL.GLubyte) -- CPU memory for colordata
+    , mpNumElements :: GL.GLsizei --      Number of triangles to draw for all hexes
+    , mpColorData :: MVar GL.BufferObject -- GPU memory for colordata
+    , mpColorSize :: GL.GLsizeiptr --     The number of bytes of color data.
     }
 {- Prepare the minimap data.  -}
 minimapPrepare :: (HexCoord, HexCoord) -> IO MinimapPrepare
@@ -217,12 +238,13 @@ minimapPrepare bounds = do
     GL.bindBuffer GL.ElementArrayBuffer $= Nothing
     return indexBO
 
-  -- Allocate CPU memory for colors.
+  -- Allocate GPU memory for colors.
   let -- Each hex has a single color, so need to write
       -- that color to the six corresponding vertices.
       numColors = numHexes * 6
       sizeColor = numColors * 4 * sizeOf (0 :: GL.GLubyte)
-  mvColorData <- mallocBytes sizeColor >>= newMVar
+  [colorBO] <-  GL.genObjectNames 1 :: IO [GL.BufferObject]
+  mvColorData <- newMVar colorBO
 
   return $ MP
            { mpBounds = bounds
@@ -230,6 +252,7 @@ minimapPrepare bounds = do
            , mpHexElements = indexBO
            , mpNumElements = fromIntegral numElements
            , mpColorData = mvColorData
+           , mpColorSize = fromIntegral $ sizeColor
            }
 
 -- Get the center of three points
