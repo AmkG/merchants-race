@@ -81,6 +81,9 @@ runScreen gr onFinish onCancel bg drawvar aspect = core
   screenHeight
     | aspect < 1 = 1 / aspect
     | otherwise  = 1
+  screenWidth
+    | aspect > 1 = aspect
+    | otherwise  = 1
 
   core ReDo = redraw
   core Idle = do
@@ -110,15 +113,23 @@ runScreen gr onFinish onCancel bg drawvar aspect = core
     return $ SetDrawing $ cancelButton `mappend` im
 
   progressHeight = 0.06 * screenHeight
-  progressWidth = 1
+  progressWidth = screenWidth
   progressY = negate $ 0.76 * screenHeight
   progressFontHeight = 0.04
+
+  mapBottom = 0.7 * screenHeight
+  mapHeight = (screenHeight + mapBottom) / 2
+  mapMove = screenHeight - mapHeight
+
   updateDrawing (step, progress, tmap) = do
     let im = mconcat
              [ progressText
              , progressBar
-             , forceSample (Any False) $ minimap tmap Set.empty
+             , forceSample (Any False) $ minimapImage
              ]
+        minimapImage = translate (0, mapMove)
+                    %% scale mapHeight mapHeight
+                    %% minimap tmap Set.empty
         progressBar = tint (Color 0.1 1 0.1 1)
                     $ rectangle (lx, ly) (ux, uy)
          where
