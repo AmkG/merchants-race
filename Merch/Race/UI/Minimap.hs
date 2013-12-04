@@ -130,8 +130,8 @@ minimapCore pre tm hidden = adjustment %% total
       GL.bufferData GL.ArrayBuffer $= (mpColorSize pre, nullPtr, GL.StreamDraw)
       -- fill the color buffer object.
       let filler p = do
-            forM_ (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
-              let (r,g,b,a) = nTerrainColor $ fst $ lookupTMap tm h
+            forM_ (zip [0..] (terrainsTMap tm)) $ \ (i, (t, _)) -> do
+              let (r,g,b,a) = nTerrainColor t
               forM_ ([0..5]) $ \ n -> do
                  pokeElemOff p (i * 24 + n * 4 + 0) r
                  pokeElemOff p (i * 24 + n * 4 + 1) g

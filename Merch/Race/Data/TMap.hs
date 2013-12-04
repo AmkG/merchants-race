@@ -4,6 +4,7 @@ module Merch.Race.Data.TMap
   ( TMap
   , boundsTMap -- TMap -> (HexCoord, HexCoord)
   , lookupTMap -- TMap -> HexCoord -> (Terrain, Bool)
+  , terrainsTMap -- TMap -> [(Terrain, Bool)]
   , settlementsTMap -- TMap -> [(Settlement, SettlementType, HexCoord)]
   , settlementAtTMap -- Monad m => TMap -> HexCoord -> m (Settlement, SettlementType)
   , distanceTMap -- TMap -> Settlement -> Settlement -> Distance
@@ -59,6 +60,14 @@ lookupTMap tmap h = final
   final
     | inRange b h = func tword
     | otherwise   = (Sea, False)
+terrainsTMap :: TMap -> [(Terrain, Bool)]
+{-# INLINE terrainsTMap #-}
+terrainsTMap tmap = concatMap translate $ elems $ arrTMap tmap
+ where
+  {-# INLINE translate #-}
+  translate word = [fst tword, snd tword]
+   where
+    tword = unmarshal word
 
 marshal :: ((Terrain, Bool), (Terrain, Bool)) -> Word8
 marshal ((tl, rl), (tr, rr)) = word
