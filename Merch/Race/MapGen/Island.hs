@@ -130,6 +130,9 @@ drawIsland = do
         mgProgress $ 0.75 + (i % watertiles) * 0.25
         mgPutTerrain h Sea
         mgPutRoad h False
+        forM_ (neighbors h) $ \n -> do
+          t <- mgGetTerrain n
+          when (t == Plains) $ mgPutTerrain n Coast
         toadd <- filterM isWater $ neighbors h
         let ntoget = foldl' (flip Set.insert) toget toadd
             viewntoget = Set.minView ntoget
