@@ -57,7 +57,7 @@ instance MapGenM MGX where
     put (s, p, m)
   mgRandom = MGX $ liftIO $ randomIO
 
-mapSize = (384, 384)
+mapSize = (256, 256)
 
 mapgenScreen :: GameResources -> (TMap -> Screen) -> Screen -> Screen
 mapgenScreen gr onFinish onCancel _ _ = do
