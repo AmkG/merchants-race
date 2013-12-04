@@ -113,21 +113,12 @@ drawIsland = do
   mgProgress 0.7
 
   -- Flood-fill the seas.
-  -- First fill the edge tiles with freshwater. 5%
-  mgStep "Terminating land"
-  let edgetiles = [fromOffset (x, y) | y <- [ly..hy], x <- [lx, hx]]
-               ++ [fromOffset (x, y) | x <- [lx..hx], y <- [ly, hy]]
-      numedgetiles = fromIntegral $ length edgetiles
-  forM_ (zip [1..] edgetiles) $ \ (i, h) -> do
-    mgProgress $ 0.7 + (i % numedgetiles) * 0.05
-    mgPutTerrain h Freshwater
-    mgPutRoad h False
 
   -- Flood fill the seas starting from the lb corner.  25%
   mgStep "Filling seas"
   let watertiles = fromIntegral $ totaltiles - landtiles
       flood i h toget = do
-        mgProgress $ 0.75 + (i % watertiles) * 0.25
+        mgProgress $ 0.70 + (i % watertiles) * 0.30
         mgPutTerrain h Sea
         mgPutRoad h False
         forM_ (neighbors h) $ \n -> do
@@ -139,7 +130,11 @@ drawIsland = do
         case viewntoget of
           Just (h,nntoget) -> flood (i + 1) h nntoget
           Nothing          -> return ()
-  flood 1 lb Set.empty
+      lbo = toOffset lb
+      ubo = toOffset ub
+      cornerso = [lbo, ubo, (fst lbo, snd ubo), (fst ubo, snd lbo)]
+      corners = map fromOffset cornerso
+  flood 1 (head corners) (Set.fromList $ tail corners)
 
   -- Finish
   mgProgress 1
