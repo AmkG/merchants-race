@@ -109,7 +109,7 @@ runScreen gr onFinish onCancel bg drawvar aspect = core
     im <- readIORef drawvar
     return $ SetDrawing $ cancelButton `mappend` im
 
-  progressHeight = 0.12 * screenHeight
+  progressHeight = 0.06 * screenHeight
   progressWidth = 1
   progressY = negate $ 0.76 * screenHeight
   progressFontHeight = 0.04
