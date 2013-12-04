@@ -21,9 +21,19 @@ filterLakes :: MapGenM m => m ()
 filterLakes = do
   bounds <- mgMapBounds
 
-  mgStep "Finding small lakes"
   let total = fromIntegral $ rangeSize bounds
-      findSmalls smalls []          = mgProgress 1 >> return smalls
+
+  mgStep "Removing lakes near coast"
+  substep 0.00 0.10 $ forM_ (zip [1..] $ range bounds) $ \ (i,h) -> do
+    mgProgress (i % total)
+    t <- mgGetTerrain h
+    when (t == Freshwater) $ do
+      nts <- mapM mgGetTerrain $ neighbors h
+      when (any (==Coast) nts) $ do
+        mgPutTerrain h Plains
+
+  mgStep "Finding small lakes"
+  let findSmalls smalls []          = mgProgress 1 >> return smalls
       findSmalls smalls ((i,h):ihs) = do
         mgProgress (i % total)
         t <- mgGetTerrain h
@@ -36,16 +46,16 @@ filterLakes = do
            then findSmalls (Set.insert h smalls) ihs
            else findSmalls smalls                ihs
          else   findSmalls smalls                ihs
-  smalls <- substep 0.00 0.45 $ findSmalls Set.empty $ zip [1..] $ range bounds
+  smalls <- substep 0.10 0.45 $ findSmalls Set.empty $ zip [1..] $ range bounds
 
   mgStep "Removing small lakes"
   let totalsmall = fromIntegral $ Set.size smalls
-  substep 0.45 0.10 $ forM_ (zip [1..] $ Set.toList smalls) $ \ (i,h) -> do
+  substep 0.55 0.10 $ forM_ (zip [1..] $ Set.toList smalls) $ \ (i,h) -> do
     mgProgress (i % totalsmall)
     mgPutTerrain h Plains
 
   mgStep "Removing tiny lakes"
-  substep 0.55 0.45 $ forM_ (zip [1..] $ range bounds) $ \ (i,h) -> do
+  substep 0.65 0.35 $ forM_ (zip [1..] $ range bounds) $ \ (i,h) -> do
     mgProgress (i % total)
     t <- mgGetTerrain h
     when (t == Freshwater) $ do
