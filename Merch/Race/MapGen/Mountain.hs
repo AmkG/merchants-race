@@ -11,8 +11,10 @@ import Merch.Race.MapGen.PerlinSpread
 import Merch.Race.MapGen.Substep
 
 import Control.Monad
+import Data.Graph.AStar
 import Data.Ix
 import Data.Ratio
+import qualified Data.Set as Set
 
 mountainTotalRatio :: Rational
 mountainTotalRatio = 0.05
@@ -41,17 +43,39 @@ drawMountains = do
       (lx,ly) = toOffset lb
       (hx,hy) = toOffset ub
       (dx,dy) = (hx - lx, hy - ly)
-  starts <- forM [1..5] $ \_ -> do
-    let find = do
-          rx <- mgRandom
-          ry <- mgRandom
-          let x = (abs rx `mod` dx) + lx
-              y = (abs ry `mod` dy) + ly
-              h = fromOffset (x,y)
-          b <- check h
-          if b then return h else find
-    find
-  substep 0.0 0.5 $ perlinSpread seed (lb,ub) mountains check Mountain starts
+      half_dx = dx `div` 2
+  -- Generate a starting seed mountain range.
+  let find side = do
+        rx <- mgRandom
+        ry <- mgRandom
+        let x | side      = ((abs rx `mod` dx) `div` 2) + lx
+              | otherwise = ((abs rx `mod` dx) `div` 2) + lx + half_dx
+            y = (abs ry `mod` dy) + ly
+            h = fromOffset (x,y)
+        b <- check h
+        if b then return h else find side
+      makeRange = do
+        -- Generate end points from the left and
+        -- right side of the map.
+        start <- find True
+        end <- find False
+        let (ex,ey) = toOffset end
+        mhs <- aStarM
+                 (\h -> do
+                   ns <- filterM check $ neighbors h
+                   return $ Set.fromList ns)
+                 (const $ const $ return 1)
+                 (\h -> do
+                   let (hx,hy) = toOffset h
+                       (dx,dy) = (abs $ ex - hx, abs $ ey -hy)
+                   return $ max dx dy)
+                 (return . (==end))
+                 (return start)
+        case mhs of
+          Nothing -> makeRange
+          Just hs -> return hs
+  ms <- makeRange
+  substep 0.0 0.5 $ perlinSpread seed (lb,ub) mountains check Mountain ms
 
   mgStep "Eroding Mountains to Plains"
   substep 0.5 0.1 $ do
@@ -59,7 +83,11 @@ drawMountains = do
       mgProgress $ (i % total) / 2
       t <- mgGetTerrain h
       if t == Plains
-       then filterM (\h -> mgGetTerrain h >>= return . (==Mountain))
+       then filterM (\h -> do
+                      t <- mgGetTerrain h
+                      if t == Mountain
+                       then mgRandom
+                       else return False)
                     (neighbors h)
        else return []
     let toRemove = concat toRemoves
