@@ -86,7 +86,7 @@ minimapCore pre tm hidden = adjustment %% total
   terrainColor Plains     = Color 0.3 0.9 0.3  1
   terrainColor Forest     = Color 0.0 0.8 0.0  1
   terrainColor Hill       = Color 0.4 0.4 0.1  1
-  terrainColor Mountain   = Color 0.6 0.6 0.6  1
+  terrainColor Mountain   = Color 0.3 0.3 0.3  1
 
   background = tint backgroundColor $ rectangle (lowx, lowy) (highx, highy)
 
