@@ -12,7 +12,7 @@ import Merch.Race.MapGen.Substep
 
 mapgen :: MapGenM m => m ()
 mapgen = do
-  substep 0.00 0.20 $ drawIsland
-  substep 0.20 0.10 $ filterLakes
-  substep 0.30 0.15 $ drawMountains
+  substep 0.00 0.25 $ drawIsland
+  substep 0.25 0.10 $ filterLakes
+  substep 0.35 0.15 $ drawMountains
 
