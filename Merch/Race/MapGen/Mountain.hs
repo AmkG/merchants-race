@@ -15,7 +15,7 @@ import Data.Ix
 import Data.Ratio
 
 mountainTotalRatio :: Rational
-mountainTotalRatio = 0.08
+mountainTotalRatio = 0.05
 
 drawMountains :: MapGenM m => m ()
 drawMountains = do
@@ -41,7 +41,7 @@ drawMountains = do
       (lx,ly) = toOffset lb
       (hx,hy) = toOffset ub
       (dx,dy) = (hx - lx, hy - ly)
-  starts <- forM [1..3] $ \_ -> do
+  starts <- forM [1..5] $ \_ -> do
     let find = do
           rx <- mgRandom
           ry <- mgRandom
@@ -52,3 +52,19 @@ drawMountains = do
           if b then return h else find
     find
   substep 0.0 0.5 $ perlinSpread seed (lb,ub) mountains check Mountain starts
+
+  mgStep "Eroding Mountains to Plains"
+  substep 0.5 0.1 $ do
+    toRemoves <- forM (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
+      mgProgress $ (i % total) / 2
+      t <- mgGetTerrain h
+      if t == Plains
+       then filterM (\h -> mgGetTerrain h >>= return . (==Mountain))
+                    (neighbors h)
+       else return []
+    let toRemove = concat toRemoves
+        numToRemove = fromIntegral $ length toRemove
+    forM (zip [0..] toRemove) $ \ (i, h) -> do
+      mgProgress $ 0.5 + (i % numToRemove) / 2
+      mgPutTerrain h Plains
+    mgProgress 1
