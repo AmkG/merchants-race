@@ -7,6 +7,8 @@ module Merch.Race.MapGen.Island
 import Merch.Race.Data
 import Merch.Race.Hex
 import Merch.Race.MapGen.Monad
+import Merch.Race.MapGen.PerlinSpread
+import Merch.Race.MapGen.Substep
 
 import Control.Monad
 import Data.Ix
@@ -16,23 +18,6 @@ import Data.Set(Set)
 import qualified Data.Set as Set
 import Data.Sequence(Seq, ViewL(EmptyL, (:<)), (|>), (><))
 import qualified Data.Sequence as Seq
-import Math.Noise
-import Math.Noise.Modules.Perlin
-
-perlinModule :: Int -> Perlin
-perlinModule = Perlin
-  2.0 -- Frequency
-  2.0 -- Lacunarity (frequency multiplier between successive octaves)
-  5 -- number of octaves
-  0.8 -- Persistence (amplitude multiplier between successive octaves)
-
-perlinFunc :: Int -> (Double, Double) -> Double
-perlinFunc seed = func
- where
-  mod = perlinModule seed
-  func (x,y) = case getValue mod (x,y,0) of
-                 Just r  -> abs r
-                 Nothing -> 0
 
 landTotalRatio :: Rational
 landTotalRatio = 0.4
@@ -46,25 +31,6 @@ drawIsland = do
       landtiles = (totaltiles *
                    (fromIntegral $ numerator landTotalRatio))
             `div` (fromIntegral $ denominator landTotalRatio)
-
-  -- Generate the noise function
-  seed <- mgRandom
-  let perlinRaw = perlinFunc seed
-      -- perlin noise function
-      -- normalizes the range lb, ub to 0.0, 1.0
-      (lx, ly) = toOffset lb
-      (hx, hy) = toOffset ub
-      -- Map to a larger grid.
-      superlb = fromOffset (lx-1,ly-1)
-      superub = fromOffset (hx+1,hy+1)
-      (lcx, lcy) = position superlb
-      (ucx, ucy) = position superub
-      (diffx, diffy) = (ucx - lcx, ucy - lcy)
-      -- given a hex, generates a random number between 0 and 1
-      perlin :: HexCoord -> Double
-      perlin h = perlinRaw ((x - lcx) / diffx, (y - lcy) / diffy)
-       where
-        (x,y) = position h
 
   -- Clear the map to freshwater.  20%
   mgStep "Clearing the map to freshwater"
@@ -80,39 +46,15 @@ drawIsland = do
         | otherwise         = return False
       ilandtiles = fromIntegral landtiles
 
+      (lx, ly) = toOffset lb
+      (hx, hy) = toOffset ub
+
       (cx, cy) = ((lx + hx) `div` 2, (ly + hy) `div` 2)
       center = fromOffset (cx, cy)
-
-      draw i q done maxp
-        | i == ilandtiles  = return ()
-        | otherwise        = case Seq.viewl q of
-          EmptyL -> return ()
-          h :< q -> do
-            let ph = perlin h
-                maxp'
-                  | ph > maxp = ph
-                  | otherwise = maxp
-            r <- mgRandom
-            if r <= ph / maxp'
-              then do
-                -- Draw land.
-                let i' = i + 1
-                mgProgress $ 0.20 + (i' % ilandtiles) * 0.50
-                mgPutTerrain h Plains
-                -- Put nearby water tiles as future land candidates
-                candidates <- filterM isWater $ neighbors h
-                let candidates' = filter (not . flip Set.member done) candidates
-                    done' = Set.union (Set.fromList candidates') done
-                    q' = q >< Seq.fromList candidates'
-                draw i' q' done' maxp'
-              -- don't draw
-              else do
-                mgProgress $ 0.20 + (i % ilandtiles) * 0.50
-                draw i (q |> h) done maxp'
-  draw 0 (Seq.singleton center) Set.empty 0.0
+  seed <- mgRandom
+  substep 0.2 0.5 $
+    perlinSpread seed (lb,ub) ilandtiles isWater Plains [center]
   mgProgress 0.7
-
-  -- Flood-fill the seas.
 
   -- Flood fill the seas starting from the lb corner.  25%
   mgStep "Filling seas"
