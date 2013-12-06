@@ -13,6 +13,7 @@ import Merch.Race.MapGen.Substep
 import Control.Monad
 import Data.Graph.AStar
 import Data.Ix
+import Data.List
 import Data.Ratio
 import qualified Data.Set as Set
 
@@ -75,10 +76,10 @@ drawMountains = do
           Nothing -> makeRange
           Just hs -> return hs
   ms <- makeRange
-  substep 0.0 0.5 $ perlinSpread seed (lb,ub) mountains check Mountain ms
+  substep 0.0 0.7 $ perlinSpread seed (lb,ub) mountains check Mountain ms
 
   mgStep "Eroding Mountains to Plains"
-  substep 0.5 0.1 $ do
+  substep 0.7 0.1 $ do
     toRemoves <- forM (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
       mgProgress $ (i % total) / 2
       t <- mgGetTerrain h
@@ -96,3 +97,30 @@ drawMountains = do
       mgProgress $ 0.5 + (i % numToRemove) / 2
       mgPutTerrain h Plains
     mgProgress 1
+
+  mgStep "Eroding Mountains to Hills"
+  substep 0.8 0.2 $ do
+    hss <- substep 0 0.5 $ forM (zip [0..] (range (lb,ub))) $ \ (i, h) -> do
+      mgProgress $ (i % total)
+      t <- mgGetTerrain h
+      if t == Mountain
+       then do
+         nts <- mapM mgGetTerrain $ neighbors h
+         if (any (== Plains) nts)
+          then do
+           mgPutTerrain h Hill
+           return [h]
+          else return []
+       else return []
+    -- get the list of hills and shuffle it
+    let hs = concat hss
+    is <- mapM (const mgRandom) hs
+    let his = zip hs is :: [(HexCoord, Int)]
+        shuffledHs = map fst $ sortBy (\ (_,a) (_,b) -> compare a b) his
+    -- prepare to spread hills
+    let check h = do
+          t <- mgGetTerrain h
+          return $ t == Mountain
+        hills = mountains `div` 3
+    seed <- mgRandom
+    substep 0.5 0.5 $ perlinSpread seed (lb,ub) hills check Hill shuffledHs
