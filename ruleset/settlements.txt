@@ -15,3 +15,312 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+/* Use a macro for one village's worth of food consumption.  */
+#define GenericPopulationDemand \
+  /* Everybody gotta eat!  */ \
+  probability 100% any { \
+    {1 "Grain"} \
+    {1 "Cured Meat"} \
+    {1 "Dried Fish"} \
+    {1 "Fruit"} \
+  } \
+  /* Everybody gotta have some tools.  */ \
+  probability 2% { 1 "Tools" } \
+  /* Salt and pepper.  */ \
+  probability 1% { 1 "Salt" 1 "Pepper" } \
+  /* Everybody gotta wear clothes.  */ \
+  probability 1.5% { 1 "Clothes" } \
+  /* Weapons, huh?  What is it good for?  */ \
+  probability 0.5% { 1 "Weapons" } \
+  /* Get whatever luxuries you can afford.  */ \
+  probability 1% any {\
+    {1 "Gold"} \
+    {1 "Silk"} \
+    {1 "Jewelry"} \
+    {1 "Fine Clothes"} \
+    {1 "Liquor"} \
+  } \
+  /* Happy winter solstice celebration!  */ \
+  scheduled 320 +/- 1 { \
+    1 "Liquor" \
+    1 "Cured Meat" \
+    1 "Dried Fish" \
+    1 "Fruit" \
+  } \
+  /* New year preparations and celebrations.  */ \
+  scheduled 364 +/- 1 { \
+    1 "Clothes" \
+    1 "Fine Clothes" \
+    1 "Jewelry" \
+    1 "Tools" \
+    1 "Fruit" \
+    1 "Liquor" \
+    1 "Cured Meat" \
+  }
+
+#define OptionalAgrarianProduction \
+  any { \
+    {120 "Grain"} \
+    {60 "Cured Meat"} \
+    {60 "Wool"} \
+    {30 "Fruit"} \
+  }
+  
+
+settlementType "Village" {
+  description {
+    "A small settlement of people, "
+    "with an agrarian society."
+  }
+  consumers {
+    GenericPopulationDemand
+  }
+  producers {
+    /* Spring harvest.  */
+    scheduled 90 +/- 5 {
+      240 "Grain"
+    }
+    scheduled 90 +/- 5 OptionalAgrarianProduction
+
+    /* Autumn harvest.  */
+    scheduled 270 +/- 5 {
+      240 "Grain"
+    }
+    scheduled 270 +/- 5 OptionalAgrarianProduction
+  }
+  craftsmen { /* No significant crafts.  */ }
+  terrain { plains }
+}
+
+settlementType "Hamlet" {
+  description {
+    "A village focusing primarily on "
+    "fruit and wool production."
+  }
+  consumers {
+    GenericPopulationDemand
+  }
+  producers {
+    /* Spring harvest.  */
+    scheduled 90 +/- 5 {
+      60 "Wool" 60 "Fruit"
+    }
+    scheduled 90 +/- 5 OptionalAgrarianProduction
+
+    /* Autumn harvest.  */
+    scheduled 270 +/- 5 {
+      60 "Wool" 60 "Fruit"
+    }
+    scheduled 270 +/- 5 OptionalAgrarianProduction
+  }
+  craftsmen { /* No significant crafts.  */ }
+  terrain { plains hill }
+}
+
+settlementType "Mining Outpost" {
+  description {
+    "A settlement in the mountains "
+    "focused on mining."
+  }
+  consumers {
+    GenericPopulationDemand
+    /* Higher tool usage.  */
+    probability 4% {1 "Tools"}
+    /* It's remote, so need to fight off bandits.  */
+    probability 5% {1 "Weapons"}
+  }
+  producers {
+    probability 1% {10 "Iron"}
+    probability 1% any { {10 "Iron"} {3 "Gold"}}
+  }
+  craftsmen {
+    /* Low-quantity, inefficient blacksmith.  */
+    {3 "Iron"} -> any {{1 "Weapons"} {1 "Tools"}}
+  }
+  terrain { mountain }
+}
+
+settlementType "Ranger's Camp" {
+  description {
+    "A camp of rangers dedicated to protecting "
+    "the royal hunting grounds from bandits."
+  }
+  consumers {
+    GenericPopulationDemand
+    /* Much higher weapon usage.  */
+    probability 12% {1 "Weapons"}
+  }
+  producers {
+    /* Legitimate hunting, ho!  */
+    probability 10% any {
+      {15 "Cured Meat"}
+      {7 "Fruit"}
+    }
+    /* This ranger's camp does not, in any way, condone
+       trading with *known* bandits.  The acquisition of
+       these luxuries is merely a legitimate, unofficial
+       perk of being a ranger and being capable of
+       unregulated trade with alternative merchants.  */
+    probability 1% any {
+      {1 "Gold"}
+      {1 "Pearls"}
+      {1 "Silk"}
+      {1 "Jewelry"}
+      {1 "Fine Clothes"}
+      {1 "Liquor"}
+    }
+  }
+  craftsmen { /* Why craft when you can, uhm, hunt?  */ }
+  terrain { forest }
+}
+#define FishermenProduction \
+  probability 10% any { \
+    {19 "Dried Fish"} \
+    {9 "Salt"} \
+  } \
+  probability 0.2% {1 "Pearls"}
+settlementType "Fishing Village" {
+  description {
+    "A settlement on the coast, "
+    "dependent upon fishing."
+  }
+  consumers {
+    GenericPopulationDemand
+  }
+  producers {
+    FishermenProduction
+  }
+  craftsmen { }
+  terrain { coast }
+}
+settlementType "Port" {
+  description {
+    "A large town or small city on the coast, "
+    "with a good port open for trading "
+    "with foreign lands."
+  }
+  consumers {
+    /* Large population.  */
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    /* Need to protect against pirates.  Arr.  */
+    probability 16% {1 "Weapons"}
+    /* Local items for foreign trade.  */
+    probability 1% any {
+      {100 "Wool"}
+      {100 "Iron"}
+      {100 "Tools"}
+      {100 "Weapons"}
+      {75 "Liquor"}
+    }
+  }
+  producers {
+    /* Some fishermen.  */
+    FishermenProduction
+    /* Foreign items.  */
+    probability 1% any {
+      {100 "Pearls"}
+      {100 "Silk"}
+      {150 "Pepper"}
+    }
+    /* While the port is open to all legitimate traders,
+       pirates and their kind are disallowed at this port.
+       Rumours that pirates occassionally manage to
+       sneak their stolen goods as legitimate trade items
+       can be dismissed.  */
+    probability 1% any {
+      {1 "Weapons"}
+      {1 "Tools"}
+      {1 "Liquor"}
+      {1 "Jewelry"}
+      {1 "Fine Clothes"}
+      {1 "Silk"}
+      {1 "Pearls"}
+      {1 "Gold"}
+    }
+  }
+  craftsmen {}
+  terrain { coast }
+}
+
+/* Towns and cities are the main places for craftsmen
+   to convert items of one type to another type.
+
+   Towns are smaller-scale but are more efficient for
+   practical goods (tools, weapons, clothes).
+   Cities are larger-scale but are more efficient for
+   luxuries like jewelry, fine clothes, and liquor.
+
+   Base rates:
+   {6 "Iron"} -> any {{6 "Tools"} {6 "Weapons"}}
+   {6 "Wool"} -> {6 "Clothes"}
+   any {{3 "Gold" 3 "Pearls"} {6 "Gold"}} -> {6 "Jewelry"}
+   any {{3 "Silk" 6 "Wool"} {6 "Silk"}} -> {6 "Fine Clothes"}
+   any {{3 "Fruit" 6 "Grain"} {6 "Fruit"}} -> {6 "Liquor"}
+
+   */
+#define TownAndCityConsumption(n) \
+    /* Needed by craftsmen.  */ \
+    probability 3% { n "Tools" } \
+    /* Needed for enforcement and protection.  */ \
+    probability 10% { n "Weapons" } \
+    /* A taste for the finer things in life.  */ \
+    probability 20% { n "Cured Meat" } \
+    probability 20% { n "Fruit" } \
+    probability 18% { n "Dried Fish" } \
+    probability 15% { n "Jewelry" } \
+    probability 15% { n "Fine Clothes" } \
+    probability 15% { n "Liquor" }
+settlementType "Town" {
+  description {
+    "A large settlement, primarily composed of craftsmen."
+  }
+  consumers {
+    /* Population.  */
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    /* Town and city-specific consumption.  */
+    TownAndCityConsumption(1)
+  }
+  producers {
+    /* A small amount of local food production.   */
+    scheduled 90 +/- 5 OptionalAgrarianProduction
+    scheduled 270 +/- 5 OptionalAgrarianProduction
+  }
+  craftsmen {
+    {3 "Iron"} -> any {{4 "Tools"} {4 "Weapons"}}
+    {3 "Wool"} -> {4 "Clothes"}
+    any {{2 "Gold" 2 "Pearls"} {4 "Gold"}} -> {3 "Jewelry"}
+    any {{2 "Silk" 4 "Wool"} {4 "Silk"}} -> {3 "Fine Clothes"}
+    any {{2 "Fruit" 4 "Grain"} {4 "Fruit"}} -> {3 "Liquor"}
+  }
+  terrain { hill plains }
+}
+settlementType "City" {
+  description {
+    "A city is a large population center, "
+    "with numerous people, mostly traders and craftsmen."
+  }
+  consumers {
+    /* Population.  */
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    GenericPopulationDemand
+    /* Town and city-specific consumption.  */
+    TownAndCityConsumption(2)
+  }
+  producers { }
+  craftsmen {
+    {9 "Iron"} -> any {{8 "Tools"} {8 "Weapons"}}
+    {9 "Wool"} -> {8 "Clothes"}
+    any {{4 "Gold" 4 "Pearls"} {8 "Gold"}} -> {9 "Jewelry"}
+    any {{4 "Silk" 8 "Wool"} {8 "Silk"}} -> {9 "Fine Clothes"}
+    any {{4 "Fruit" 8 "Grain"} {8 "Fruit"}} -> {9 "Liquor"}
+  }
+}

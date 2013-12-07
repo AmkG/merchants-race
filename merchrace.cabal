@@ -17,6 +17,7 @@ data-files: ruleset/difficulties.txt
           , ruleset/items.txt
           , ruleset/names.txt
           , ruleset/ruleset.txt
+          , ruleset/settlementgen.txt
           , ruleset/settlements.txt
           , FreeSans.ttf
 extra-source-files:

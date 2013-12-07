@@ -1,4 +1,4 @@
-/* ruleset.txt - Ruleset file for Merchant's Race.
+/* settlementgen.txt - Settlement generation rules for Merchant's Race.
 
 This file is part of Merchant's Race.
 
@@ -15,10 +15,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 */
-/* Ruleset for Merchant's Race.  */
-#include "items.txt"
-#include "settlements.txt"
-#include "settlementgen.txt"
-#include "names.txt"
-#include "difficulties.txt"
 
+/* Due to the specific way in which the game generates
+   settlements, settlements listed first tend to be
+   better connected.  Use this to make cities, towns,
+   and ports more plausible as the crossroads between
+   villages.  */
+settlementGenerator {
+  1 "City"
+  1 "Town"
+  1 "Port"
+
+  1 "City"
+  1 "Town"
+  1 "Port"
+
+  1 "City"
+  1 "Town"
+  1 "Port"
+
+  5 "Town"
+
+  6 "Hamlet"
+  20 "Village"
+  12 "Fishing Village"
+  5 "Mining Outpost"
+  3 "Ranger's Camp"
+}

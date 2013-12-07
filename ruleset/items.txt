@@ -31,7 +31,7 @@ item "Cured Meat" {
 item "Dried Fish" {
   description {
     "Fish that has been dried under the sun, "
-    "to make them practically tranportable."
+    "to make them practically transportable."
   }
 }
 item "Fruit" {
@@ -39,5 +39,85 @@ item "Fruit" {
     "The product of various fruiting trees and plants, "
     "the sweetness of fruit makes them a desired "
     "delicacy."
+  }
+}
+
+item "Wool" {
+  description {
+    "The hair of sheep, wool is plentiful and "
+    "can be used to make cheap clothing."
+  }
+}
+item "Iron" {
+  description {
+    "A strong and plentiful metal, "
+    "iron is used in making tools and weapons."
+  }
+}
+item "Gold" {
+  description {
+    "Gold's lustre makes it attractive, "
+    "and its pliant flexibility makes it easy to work "
+    "into fine jewelry."
+  }
+}
+item "Salt" {
+  description {
+    "Salt gives flavor to almost every dish.  "
+    "It is complemented by pepper."
+  }
+}
+item "Pepper" {
+  description {
+     "Imported from foreign lands, "
+     "pepper goes well with salt, "
+     "providing full flavoring to many dishes."
+  }
+}
+item "Silk" {
+  description {
+    "A smooth, comfortable fabric "
+    "imported from foreign lands."
+  }
+}
+item "Pearls" {
+  description {
+    "A beautiful white gem from foreign lands."
+  }
+}
+item "Tools" {
+  description {
+    "Implements needed for farming, fishing, hunting, "
+    "construction, crafting, and other activities."
+  }
+}
+item "Weapons" {
+  description {
+    "Implements for war and self-defense."
+  }
+}
+item "Clothes" {
+  description {
+    "Everyday clothes for the working classes."
+  }
+}
+item "Jewelry" {
+  description {
+    "Fine creations of precious metals and gems, "
+    "shaped to complement the human face and form."
+  }
+}
+item "Fine Clothes" {
+  description {
+    "Clothes of exquisite shape and construction, "
+    "created to accentuate the human form "
+    "while being far more comfortable "
+    "than everyday clothing."
+  }
+}
+item "Liquor" {
+  description {
+    "The result of fermentation of various "
+    "grains and fruits."
   }
 }
