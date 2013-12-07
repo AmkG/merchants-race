@@ -79,16 +79,12 @@ drawMountains = do
         -- right side of the map.
         start <- find True
         end <- find False
-        let (ex,ey) = toOffset end
         mhs <- aStarM
                  (\h -> do
                    ns <- filterM check $ neighbors h
                    return $ Set.fromList ns)
                  (const $ const $ return 1)
-                 (\h -> do
-                   let (hx,hy) = toOffset h
-                       (dx,dy) = (abs $ ex - hx, abs $ ey -hy)
-                   return $ max dx dy)
+                 (return . distance end)
                  (return . (==end))
                  (return start)
         case mhs of
