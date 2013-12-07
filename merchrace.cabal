@@ -46,6 +46,7 @@ executable merchrace
                ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen
                ,  Merch.Race.MapGen.FilterLakes
+               ,  Merch.Race.MapGen.Forest
                ,  Merch.Race.MapGen.Island
                ,  Merch.Race.MapGen.Monad
                ,  Merch.Race.MapGen.Mountain

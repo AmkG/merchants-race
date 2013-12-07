@@ -23,6 +23,7 @@ module Merch.Race.MapGen
   ) where
 
 import Merch.Race.MapGen.FilterLakes
+import Merch.Race.MapGen.Forest
 import Merch.Race.MapGen.Island
 import Merch.Race.MapGen.Monad
 import Merch.Race.MapGen.Mountain
@@ -33,4 +34,4 @@ mapgen = do
   substep 0.00 0.25 $ drawIsland
   substep 0.25 0.10 $ filterLakes
   substep 0.35 0.15 $ drawMountains
-
+  substep 0.50 0.10 $ drawForest
