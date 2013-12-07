@@ -27,20 +27,22 @@ import Merch.Race.Data.TMap
 import Merch.Race.GameResources
 import Merch.Race.Hex
 import Merch.Race.MapGen
+import Merch.Race.Ruleset
 import Merch.Race.UI.Button
 import Merch.Race.UI.Drawing
 import Merch.Race.UI.DrawingCombinators
 import Merch.Race.UI.Minimap
 
-import Control.Monad.Trans
+import Control.Monad.Reader
 import Control.Monad.State
+import Control.Monad.Trans
 import Data.IORef
 import Data.Monoid
 import qualified Data.Set as Set
 import System.Random
 
 newtype MGX a
-  = MGX {run :: BackM (String, Rational, MTMap) a}
+  = MGX {run :: ReaderT GameResources (BackM (String, Rational, MTMap)) a}
 instance Monad MGX where
   return = MGX . return
   fail = MGX . fail
@@ -74,6 +76,15 @@ instance MapGenM MGX where
     (s, _, m) <- get
     put (s, p, m)
   mgRandom = MGX $ liftIO $ randomIO
+  mgNameGenerator = MGX $ do
+    gr <- ask
+    return $ nameGenerator $ grRuleset gr
+  mgSettlementGenerator = MGX $ do
+    gr <- ask
+    return $ settlementGenerator $ grRuleset gr
+  mgRequiredTerrain st = MGX $ do
+    gr <- ask
+    return $ terrain (grRuleset gr) st
 
 mapSize = (256, 256)
 
@@ -86,7 +97,7 @@ mapgenScreen gr onFinish onCancel _ _ = do
       startingState = ("Starting", 0, mtm)
   drawvar <- newIORef mempty
 
-  bg <- runBackM freeze (run mapgen) startingState
+  bg <- runBackM freeze (runReaderT (run mapgen) gr) startingState
   return $ SetScreen $ runScreen gr onFinish onCancel bg drawvar
 runScreen :: GameResources
           -> (TMap -> Screen) -- on success

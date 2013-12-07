@@ -43,3 +43,9 @@ class Monad m => MapGenM m where
   mgProgress :: Rational -> m ()
   -- Gets a random item.
   mgRandom :: Random r => m r
+  -- Get settlement name generator.
+  mgNameGenerator :: m NameGenerator
+  -- Get settlement generator.
+  mgSettlementGenerator :: m [(Int, SettlementType)]
+  -- Get the required Terrain of a specific SettlementType
+  mgRequiredTerrain :: SettlementType -> m [Terrain]

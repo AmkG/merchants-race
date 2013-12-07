@@ -48,6 +48,9 @@ instance MapGenM m => MapGenM (SubMG m) where
   mgProgress p = SubMG $ \mult add -> do
     mgProgress $ p * mult + add
   mgRandom = lift mgRandom
+  mgNameGenerator = lift mgNameGenerator
+  mgSettlementGenerator = lift mgSettlementGenerator
+  mgRequiredTerrain = lift . mgRequiredTerrain
 
 substep :: MapGenM m => Rational -> Rational -> SubMG m a -> m a
 substep add mult ma = run ma mult add
