@@ -20,7 +20,8 @@ data-files: ruleset/difficulties.txt
           , ruleset/settlements.txt
           , FreeSans.ttf
 extra-source-files:
-  README, Math/Geom/DelaunayTest.hs, runmerchrace
+  README, Math/Geom/DelaunayTest.hs, runmerchrace,
+  AUTHORS, AUTHORS.FreeSans
 
 executable merchrace
   main-is:        Main.hs
