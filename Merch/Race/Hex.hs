@@ -77,6 +77,7 @@ module Merch.Race.Hex
   , distance
 
   , position
+  , fromPosition
 
   , toOffset
   , fromOffset
@@ -183,3 +184,24 @@ position (HexCoord (xi, zi)) = (xp, yp)
 half_sqrt3 :: Fractional n => n
 half_sqrt3 = (1.732050807568877293527446341505 / 2)
 
+{- Approximates the hex coordinates from a given
+   position.  -}
+fromPosition :: RealFrac n => (n,n) -> HexCoord
+fromPosition (xp,yp) = HexCoord (xi,zi)
+ where
+  x = xp * half_sqrt3 * 4 / 3
+  z = yp - (x / 2)
+  y = negate $ x + z
+
+  rx = round x :: Int
+  ry = round y :: Int
+  rz = round z :: Int
+
+  x_diff = abs $ fromIntegral rx - x
+  y_diff = abs $ fromIntegral ry - y
+  z_diff = abs $ fromIntegral rz - z
+
+  (xi,zi)
+    | x_diff > y_diff && x_diff > z_diff = (negate (ry + rz), rz)
+    | y_diff > z_diff                    = (rx, rz)
+    | otherwise                          = (rx, negate (rx + ry))

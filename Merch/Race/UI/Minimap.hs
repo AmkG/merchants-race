@@ -180,7 +180,11 @@ minimapCore pre tm hidden = adjustment %% total
       GL.clientState GL.VertexArray $= GL.Disabled
       GL.clientState GL.ColorArray $= GL.Disabled
       GL.bindBuffer GL.ElementArrayBuffer $= Nothing
-  terrainPick pt = First Nothing -- TODO: check for hex coordinates.
+  terrainPick pt
+    | inRange (lb,ub) h = First $ Just h
+    | otherwise         = First Nothing
+   where
+    h = fromPosition pt
 
 -- Normalizes a color to 4 byte representation
 normalizeColor :: Color -> (GL.GLubyte, GL.GLubyte, GL.GLubyte, GL.GLubyte)
