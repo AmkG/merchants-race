@@ -93,8 +93,6 @@ minimapCore pre tm hidden = adjustment %% total
   supercenter = (negate $ (lowx + highx) / 2, negate $ (lowy + highy) / 2)
   adjustment = scale adjustx adjusty `mappend` translate supercenter
 
-  hs() = filter (not . flip Set.member hidden) $ range (lb, ub)
-
   backgroundColor = Color 0 0 0 1
   settlementColor = Color 0.25 0.25 1.0  1
   roadColor = Color 0.25 0.25 0   1
@@ -113,9 +111,27 @@ minimapCore pre tm hidden = adjustment %% total
           , roads
           , terrains
           ]
+  settlements = tint settlementColor
+              $ mconcat
+              $ map (forceSample (First Nothing) . mkSettlement)
+                    (settlementsTMap tm)
+  mkSettlement (_,_,h) = (translate (x,y) `compose` scale 0.4 0.4)
+                      %% regularPoly 4
+    where
+      (x,y) = position h
   -- TODO
-  settlements = mempty
-  roads = mempty
+  roads = tint roadColor
+        $ mconcat
+        $ concatMap mkRoad
+                    (filter chooseRoad (range (lb,ub)))
+  chooseRoad h = not (Set.member h hidden)
+              && snd (lookupTMap tm h)
+  mkRoad h = map (forceSample (First Nothing) . core)
+                 (filter (snd . lookupTMap tm)
+                         (neighbors h))
+   where
+    ph = position h
+    core h2 = line ph $ halfway ph (position h2)
 
   -- Drawn tile hexes.
   terrains
