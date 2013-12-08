@@ -27,6 +27,7 @@ import Merch.Race.MapGen.Forest
 import Merch.Race.MapGen.Island
 import Merch.Race.MapGen.Monad
 import Merch.Race.MapGen.Mountain
+import Merch.Race.MapGen.Settlement
 import Merch.Race.MapGen.Substep
 
 mapgen :: MapGenM m => m ()
@@ -35,3 +36,4 @@ mapgen = do
   substep 0.25 0.10 $ filterLakes
   substep 0.35 0.15 $ drawMountains
   substep 0.50 0.10 $ drawForest
+  substep 0.60 0.25 $ drawSettlement

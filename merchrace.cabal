@@ -52,6 +52,7 @@ executable merchrace
                ,  Merch.Race.MapGen.Monad
                ,  Merch.Race.MapGen.Mountain
                ,  Merch.Race.MapGen.PerlinSpread
+               ,  Merch.Race.MapGen.Settlement
                ,  Merch.Race.MapGen.Substep
                ,  Merch.Race.Market
                ,  Merch.Race.ProdCons
