@@ -102,7 +102,7 @@ loop ng total = core
            movecost Sea        = 100000
            movecost Freshwater = 100000
            movecost Coast      = 10
-           movecost Plains     = 2
+           movecost Plains     = 1.7
            movecost Forest     = 5
            movecost Hill       = 5.5
            movecost Mountain   = 7
@@ -116,7 +116,16 @@ loop ng total = core
                 -- Use the larger movement cost.
                 t1 <- mgGetTerrain h1
                 t2 <- mgGetTerrain h2
-                return $ max (movecost t1) (movecost t2)
+                -- Adjust movement costs if going
+                -- to a tile that is different y-coord
+                -- in offset coordinates
+                let (_, y1) = toOffset h1
+                    (_, y2) = toOffset h2
+                    (c1, c2) = (movecost t1, movecost t2)
+                    (c1', c2')
+                      | y1 == y2  = (c1, c2)
+                      | otherwise = (c1 * 1.05, c2 * 1.05)
+                return $ max c1' c2'
        Just roads <- aStarM
                        neighborM
                        movecostM
