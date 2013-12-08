@@ -44,6 +44,7 @@ instance MapGenM m => MapGenM (SubMG m) where
   mgPutTerrain h t = lift $ mgPutTerrain h t
   mgGetRoad = lift . mgGetRoad
   mgPutRoad h r = lift $ mgPutRoad h r
+  mgAddSettlement s st h = lift $ mgAddSettlement s st h
   mgStep = lift . mgStep
   mgProgress p = SubMG $ \mult add -> do
     mgProgress $ p * mult + add

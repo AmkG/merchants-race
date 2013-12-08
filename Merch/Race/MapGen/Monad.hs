@@ -36,6 +36,7 @@ class Monad m => MapGenM m where
   mgPutTerrain :: HexCoord -> Terrain -> m ()
   mgGetRoad :: HexCoord -> m Bool
   mgPutRoad :: HexCoord -> Bool -> m ()
+  mgAddSettlement :: Settlement -> SettlementType -> HexCoord -> m ()
   -- Indicates the start of a step in map generation.
   mgStep :: String -> m ()
   -- Indicates how much progress in the current step.
