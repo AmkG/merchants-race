@@ -323,4 +323,5 @@ settlementType "City" {
     any {{4 "Silk" 8 "Wool"} {8 "Silk"}} -> {9 "Fine Clothes"}
     any {{4 "Fruit" 8 "Grain"} {8 "Fruit"}} -> {9 "Liquor"}
   }
+  terrain { hill plains }
 }
