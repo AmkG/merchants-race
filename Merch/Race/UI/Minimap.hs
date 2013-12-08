@@ -94,8 +94,8 @@ minimapCore pre tm hidden = adjustment %% total
   adjustment = scale adjustx adjusty `mappend` translate supercenter
 
   backgroundColor = Color 0 0 0 1
-  settlementColor = Color 0.25 0.25 1.0  1
-  roadColor = Color 0.25 0.25 0   1
+  settlementColor = Color 1.0 0.0 0.0  1
+  roadColor = Color 0.0 0.0 0   1
   terrainColor Sea        = Color 0.1 0.1 0.9  1
   terrainColor Freshwater = Color 0.3 0.4 1.0  1
   terrainColor Coast      = Color 0.8 0.9 0.4  1
@@ -115,7 +115,7 @@ minimapCore pre tm hidden = adjustment %% total
               $ mconcat
               $ map (forceSample (First Nothing) . mkSettlement)
                     (settlementsTMap tm)
-  mkSettlement (_,_,h) = (translate (x,y) `compose` scale 0.4 0.4)
+  mkSettlement (_,_,h) = (translate (x,y) `compose` scale 2 2)
                       %% regularPoly 4
     where
       (x,y) = position h
