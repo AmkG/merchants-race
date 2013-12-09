@@ -59,10 +59,10 @@ loop :: MapGenM m
      -> Map Terrain (Set HexCoord) -- Terrain locations.
      -> Int --                        Number of generated settlements.
      -> [SettlementType] --           List of settlement types to generate.
-     -> m ()
+     -> m [(Settlement, HexCoord)]
 loop ng total = core
  where
-   core done tm numGen []       = mgProgress 1
+   core done tm numGen []       = mgProgress 1 >> (return $ Map.toList done)
    core done tm numGen (st:sts) = do
      mgProgress $ fromIntegral numGen % fromIntegral total
      -- Look for candidate locations
@@ -135,6 +135,7 @@ loop ng total = core
        -- Fill in roads
        mapM_ (flip mgPutRoad True) roads
        mgPutRoad h True
+       mgPutRoad h2 True
 
      -- Disallow tiles within 5 tiles of the selected tile.
      let disalloweds = Set.fromList $ nearby 5 h
@@ -142,7 +143,7 @@ loop ng total = core
 
      core done' tm' (numGen+1) sts
 
-drawSettlement :: MapGenM m => m ()
+drawSettlement :: MapGenM m => m [(Settlement, HexCoord)]
 drawSettlement = do
 
   -- First collect the terrains.

@@ -49,6 +49,7 @@ executable merchrace
                ,  Merch.Race.MapGen.FilterLakes
                ,  Merch.Race.MapGen.Forest
                ,  Merch.Race.MapGen.Island
+               ,  Merch.Race.MapGen.Measure
                ,  Merch.Race.MapGen.Monad
                ,  Merch.Race.MapGen.Mountain
                ,  Merch.Race.MapGen.PerlinSpread

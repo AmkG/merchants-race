@@ -25,6 +25,7 @@ module Merch.Race.MapGen
 import Merch.Race.MapGen.FilterLakes
 import Merch.Race.MapGen.Forest
 import Merch.Race.MapGen.Island
+import Merch.Race.MapGen.Measure
 import Merch.Race.MapGen.Monad
 import Merch.Race.MapGen.Mountain
 import Merch.Race.MapGen.Settlement
@@ -36,4 +37,6 @@ mapgen = do
   substep 0.25 0.10 $ filterLakes
   substep 0.35 0.15 $ drawMountains
   substep 0.50 0.10 $ drawForest
-  substep 0.60 0.25 $ drawSettlement
+  settlements <- substep 0.60 0.25 $ drawSettlement
+  substep 0.85 0.15 $ measureDistances settlements
+  return ()

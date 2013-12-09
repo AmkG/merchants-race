@@ -73,6 +73,10 @@ instance MapGenM MGX where
     (step, p, m) <- get
     liftIO $ addSettlementMTMap m s st h
     put (step, p, m)
+  mgPutDistance s1 s2 d = MGX $ do
+    (step, p, m) <- get
+    liftIO $ writeDistanceMTMap m s2 s2 d
+    put (step, p, m)
   mgStep s = MGX $ do
     (_, p, m) <- get
     put (s, p, m)
