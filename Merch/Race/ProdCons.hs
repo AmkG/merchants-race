@@ -39,9 +39,11 @@ module Merch.Race.ProdCons
 
 import Merch.Race.Data
 import Merch.Race.ItemSetPrice
+import Merch.Race.RGX
 
 import Control.Monad
 import Data.Ratio
+import System.Random
 
 class ItemSetPriceM m => ProdConsM m where
   pcGetAllSettlements :: m [Settlement]
@@ -50,14 +52,10 @@ class ItemSetPriceM m => ProdConsM m where
   pcGetProdCons :: Settlement -> ProdConsId -> m ProdCons
   -- Get the current day of the year.
   pcGetDay :: m Day
-  -- Get a random Integer from 0 to n - 1.
-  pcGetRandom :: Integer -> m Integer
-  -- Scheduled days
-  -- The prodcons function promises to only call
-  -- pcGetScheduledDay on ProdConsId's it has called
-  -- pcSetScheduledDay previously.
-  pcSetScheduledDay :: Settlement -> ProdConsId -> Day -> m ()
-  pcGetScheduledDay :: Settlement -> ProdConsId -> m Day
+
+  -- Get a random number generator for a specific ProdConsId.
+  pcGetRGX :: Settlement -> ProdConsId -> m RGX
+
   -- Produce or consume.  Give negative values to
   -- consume instead.
   pcProduce :: Settlement -> Item -> Integer -> m ()
@@ -74,22 +72,6 @@ prodcons = do
     consumers <- pcGetAllConsumers settlement
     return (settlement, consumers)
 
-  -- On day 1, schedule everything for this year.
-  when (today == 1) $ do
-    let settlementProdCons = settlementProducers ++ settlementConsumers
-    forM_ settlementProdCons $ \ (settlement, prodcons) -> do
-      forM_ prodcons $ \ prodcon -> do
-        dat <- pcGetProdCons settlement prodcon
-        case dat of
-          Scheduled day variance _ -> do
-            rand <- pcGetRandom (fromIntegral variance * 2 + 1)
-            let targetDay = day + fromIntegral rand - variance
-                selectDay
-                  | targetDay < 1 = 1
-                  | otherwise     = targetDay
-            pcSetScheduledDay settlement prodcon selectDay
-          _                        -> return ()
-
   -- Producers and consumers are handled similarly,
   -- except for this bit about whether they go for
   -- the highest or the lowest price, and except
@@ -100,12 +82,18 @@ prodcons = do
   forM_ allFuns $ \ ((settlement, pcids), (selector, transform)) -> do
     forM_ pcids $ \ pcid -> do
       dat <- pcGetProdCons settlement pcid
+      g <- pcGetRGX settlement pcid
       (sel, itemset) <- case dat of
-        Scheduled _ _ itemset -> do
-          day <- pcGetScheduledDay settlement pcid
-          return ((day == today), itemset)
+        Scheduled day off itemset -> do
+          let day' = fromIntegral $ day :: Int
+              off' = fromIntegral $ off
+              (selOff', _) = randomR (negate off', off') g
+              selDay = fromIntegral $ day' + selOff'
+          return ((selDay == today), itemset)
         Probability prob itemset -> do
-          rand <- pcGetRandom (denominator prob)
+          let g2 = feedRGX (show today) g
+              denom = fromIntegral $ denominator prob :: Int
+              rand = fromIntegral $ fst $ randomR (0, denom - 1) g
           return (rand < numerator prob, itemset)
       when sel $ do
         (items, _) <- selector settlement itemset
