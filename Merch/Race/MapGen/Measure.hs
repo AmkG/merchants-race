@@ -30,35 +30,35 @@ import Merch.Race.MapGen.Monad
 import Control.Monad
 import Data.Graph.AStar
 import Data.Ratio
-import Data.Set(Set)
+import qualified Data.Map as Map
+import Data.Map(Map)
 import qualified Data.Set as Set
+import Data.Set(Set)
 
 measureDistances :: MapGenM m => [(Settlement, HexCoord)] -> m ()
 measureDistances settlements = do
-  let sPairs = pairs settlements
-      total = fromIntegral $ length sPairs
-  forM_ (zip [0..] sPairs) $ \ (i, ((s1, h1), (s2, h2))) -> do
+  let total = fromIntegral $ length settlements
+      h2s = Map.fromList $ map (\ (s,h) -> (h,s) ) settlements
+  forM_ (zip [0..] settlements) $ \ (i, (s, h)) -> do
     mgStep $ "Measuring distances ("++show i++"/"++show total++")"
     mgProgress $ i % total
-    Just path <- aStarM
-                   neighborM
-                   (const $ const $ return 1)
-                   (return . fromIntegral . distance h2)
-                   (return . (==h2))
-                   (return h1)
-    let distance = fromIntegral $ length path
-        daysTravel = distance `div` 4
-    mgPutDistance s1 s2 daysTravel
+    let analyzeLoop dist done []        = return ()
+        analyzeLoop dist done wavefront = do
+          let daysTravel = fromIntegral $ dist `div` 4
+          hss <- forM wavefront $ \ h -> do
+            let ms2 = Map.lookup h h2s
+            case ms2 of
+              Just s2 -> mgPutDistance s s2 daysTravel
+              Nothing -> return ()
+            neighborM h
+          let hs = Set.fromList $ concat hss
+              done' = Set.union hs done
+              toAdd = Set.difference hs done
+              wavefront' = Set.toList toAdd
+          analyzeLoop (dist+1) done' wavefront'
+    ns <- neighborM h
+    analyzeLoop 1 (Set.fromList $ h:ns) ns
   mgProgress 1
 
-pairs :: [a] -> [(a,a)]
-pairs []     = []
-pairs (a:as) = gen a as ++ pairs as
- where
-  gen _ []     = []
-  gen a (b:bs) = (a,b):gen a bs
-
-neighborM :: MapGenM m => HexCoord -> m (Set HexCoord)
-neighborM h = do
-  ns <- filterM mgGetRoad $ neighbors h
-  return $ Set.fromList ns
+neighborM :: MapGenM m => HexCoord -> m [HexCoord]
+neighborM h = filterM mgGetRoad $ neighbors h
