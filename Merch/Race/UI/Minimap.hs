@@ -104,11 +104,13 @@ minimapCore pre tm hidden = adjustment %% total
   terrainColor Hill       = Color 0.5 0.5 0.1  1
   terrainColor Mountain   = Color 0.6 0.6 0.6  1
 
+  terrainColorR (t, False) = terrainColor t
+  terrainColorR (t, True ) = terrainColor t `blend` roadColor
+
   background = tint backgroundColor $ rectangle (lowx, lowy) (highx, highy)
 
   total = mconcat
           [ settlements
-          , roads
           , terrains
           ]
   settlements = tint settlementColor
@@ -119,19 +121,6 @@ minimapCore pre tm hidden = adjustment %% total
                       %% regularPoly 4
     where
       (x,y) = position h
-  -- TODO
-  roads = tint roadColor
-        $ mconcat
-        $ concatMap mkRoad
-                    (filter chooseRoad (range (lb,ub)))
-  chooseRoad h = not (Set.member h hidden)
-              && snd (lookupTMap tm h)
-  mkRoad h = map (forceSample (First Nothing) . core)
-                 (filter (snd . lookupTMap tm)
-                         (neighbors h))
-   where
-    ph = position h
-    core h2 = line ph $ halfway ph (position h2)
 
   -- Drawn tile hexes.
   terrains
@@ -142,21 +131,35 @@ minimapCore pre tm hidden = adjustment %% total
   terrainDraw tintC = do
     -- Generate normalized colors
     let n = normalizeColor
-        seaColor        = n $ tintC `modulate` terrainColor Sea
-        freshwaterColor = n $ tintC `modulate` terrainColor Freshwater
-        coastColor      = n $ tintC `modulate` terrainColor Coast
-        plainsColor     = n $ tintC `modulate` terrainColor Plains
-        forestColor     = n $ tintC `modulate` terrainColor Forest
-        hillColor       = n $ tintC `modulate` terrainColor Hill
-        mountainColor   = n $ tintC `modulate` terrainColor Mountain
-        nTerrainColor Sea        = seaColor
-        nTerrainColor Freshwater = freshwaterColor
-        nTerrainColor Coast      = coastColor
-        nTerrainColor Plains     = plainsColor
-        nTerrainColor Forest     = forestColor
-        nTerrainColor Hill       = hillColor
-        nTerrainColor Mountain   = mountainColor
-        
+        seaColor        = n $ tintC `modulate` terrainColorR (Sea, False)
+        seaColorR       = n $ tintC `modulate` terrainColorR (Sea, True )
+        freshwaterColor = n $ tintC `modulate` terrainColorR (Freshwater, False)
+        freshwaterColorR= n $ tintC `modulate` terrainColorR (Freshwater, True )
+        coastColor      = n $ tintC `modulate` terrainColorR (Coast, False)
+        coastColorR     = n $ tintC `modulate` terrainColorR (Coast, True )
+        plainsColor     = n $ tintC `modulate` terrainColorR (Plains, False)
+        plainsColorR    = n $ tintC `modulate` terrainColorR (Plains, True )
+        forestColor     = n $ tintC `modulate` terrainColorR (Forest, False)
+        forestColorR    = n $ tintC `modulate` terrainColorR (Forest, True )
+        hillColor       = n $ tintC `modulate` terrainColorR (Hill, False)
+        hillColorR      = n $ tintC `modulate` terrainColorR (Hill, True )
+        mountainColor   = n $ tintC `modulate` terrainColorR (Mountain, False)
+        mountainColorR  = n $ tintC `modulate` terrainColorR (Mountain, True )
+        nTerrainColorR (Sea       , False) = seaColor
+        nTerrainColorR (Sea       , True ) = seaColorR
+        nTerrainColorR (Freshwater, False) = freshwaterColor
+        nTerrainColorR (Freshwater, True ) = freshwaterColorR
+        nTerrainColorR (Coast     , False) = coastColor
+        nTerrainColorR (Coast     , True ) = coastColorR
+        nTerrainColorR (Plains    , False) = plainsColor
+        nTerrainColorR (Plains    , True ) = plainsColorR
+        nTerrainColorR (Forest    , False) = forestColor
+        nTerrainColorR (Forest    , True ) = forestColorR
+        nTerrainColorR (Hill      , False) = hillColor
+        nTerrainColorR (Hill      , True ) = hillColorR
+        nTerrainColorR (Mountain  , False) = mountainColor
+        nTerrainColorR (Mountain  , True ) = mountainColorR
+
     -- Grab the color buffer object
     withMVar (mpColorData pre) $ \colorBO -> do
       -- prepare a new buffer.
@@ -164,8 +167,8 @@ minimapCore pre tm hidden = adjustment %% total
       GL.bufferData GL.ArrayBuffer $= (mpColorSize pre, nullPtr, GL.StreamDraw)
       -- fill the color buffer object.
       let filler p = do
-            forM_ (zip [0..] (terrainsTMap tm)) $ \ (i, (t, _)) -> do
-              let (r,g,b,a) = nTerrainColor t
+            forM_ (zip [0..] (terrainsTMap tm)) $ \ (i, t) -> do
+              let (r,g,b,a) = nTerrainColorR t
               forM_ ([0..5]) $ \ n -> do
                  pokeElemOff p (i * 24 + n * 4 + 0) r
                  pokeElemOff p (i * 24 + n * 4 + 1) g
@@ -206,6 +209,14 @@ minimapCore pre tm hidden = adjustment %% total
 normalizeColor :: Color -> (GL.GLubyte, GL.GLubyte, GL.GLubyte, GL.GLubyte)
 normalizeColor (Color r g b a) =
   (round $ 255 * r, round $ 255 * g, round $ 255 * b, round $ 255 * a)
+
+-- blends two colors
+blend :: Color -> Color -> Color
+blend (Color r1 g1 b1 a1) (Color r2 g2 b2 a2) =
+  Color ((r1 + r2) / 2)
+        ((g1 + g2) / 2)
+        ((b1 + b2) / 2)
+        ((a1 + a2) / 2)
 
 data MinimapPrepare
   = MP
