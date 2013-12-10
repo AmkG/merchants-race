@@ -1,4 +1,4 @@
-{- Merch.Race.ProdCons - Model for item producers and consumers.
+{- Merch.Race.Economy.ProdCons - Model for item producers and consumers.
 
 Copyright 2013 Alan Manuel K. Gloria
 
@@ -32,7 +32,7 @@ along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
    variance).  The latter is mostly to model
    farming village harvests.  -}
 
-module Merch.Race.ProdCons
+module Merch.Race.Economy.ProdCons
   ( ProdConsM(..)
   , prodcons
   ) where

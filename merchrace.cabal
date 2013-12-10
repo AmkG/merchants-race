@@ -36,15 +36,17 @@ executable merchrace
                ,  Math.Geom.QuadEdge
                ,  Math.Geom.QuadEdge.Data
                ,  Math.Geom.QuadEdge.Pure
-               ,  Merch.Race.CMerch
                ,  Merch.Race.Control.Background
-               ,  Merch.Race.Craftsmen
                ,  Merch.Race.Data
                ,  Merch.Race.Data.Serialize
                ,  Merch.Race.Data.TMap
+               ,  Merch.Race.Economy.CMerch
+               ,  Merch.Race.Economy.Craftsmen
+               ,  Merch.Race.Economy.ItemSetPrice
+               ,  Merch.Race.Economy.ProdCons
+               ,  Merch.Race.Economy.Market
                ,  Merch.Race.GameResources
                ,  Merch.Race.Hex
-               ,  Merch.Race.ItemSetPrice
                ,  Merch.Race.MapGen
                ,  Merch.Race.MapGen.FilterLakes
                ,  Merch.Race.MapGen.Forest
@@ -55,8 +57,6 @@ executable merchrace
                ,  Merch.Race.MapGen.PerlinSpread
                ,  Merch.Race.MapGen.Settlement
                ,  Merch.Race.MapGen.Substep
-               ,  Merch.Race.Market
-               ,  Merch.Race.ProdCons
                ,  Merch.Race.RGX
                ,  Merch.Race.Ruleset
                ,  Merch.Race.Ruleset.Data

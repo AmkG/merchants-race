@@ -1,4 +1,4 @@
-{- Merch.Race.Craftsmen - Model for craftsmen.
+{- Merch.Race.Economy.Craftsmen - Model for craftsmen.
 
 Copyright 2013 Alan Manuel K. Gloria
 
@@ -27,7 +27,7 @@ along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 
    Given the option, they will consume the cheapest
    ingredients to produce the most expensive results.  -}
-module Merch.Race.Craftsmen
+module Merch.Race.Economy.Craftsmen
   ( CraftsmenM(..)
   , craftsmen
   ) where

@@ -1,4 +1,4 @@
-{- Merch.Race.CMerch - Computer merchants model.
+{- Merch.Race.Economy.CMerch - Computer merchants model.
 
 Copyright 2013 Alan Manuel K. Gloria
 
@@ -23,7 +23,7 @@ along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 {- Merchants move items from settlements with low price
    to settlements with high price.  If the base price of
    the item is cheapr, the merchant can move more items.  -}
-module Merch.Race.CMerch
+module Merch.Race.Economy.CMerch
   ( CMerchM(..)
   , cmerch
   ) where

@@ -1,4 +1,4 @@
-{- Merch.Race.Market - Market pricing model.
+{- Merch.Race.Economy.Market - Market pricing model.
 
 Copyright 2013 Alan Manuel K. Gloria
 
@@ -42,7 +42,7 @@ along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
    of the PID controller is the price of the item
    at that settlement.  -}
 
-module Merch.Race.Market
+module Merch.Race.Economy.Market
   ( MarketM(..)
   , market
   , marketInit

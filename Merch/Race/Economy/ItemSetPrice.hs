@@ -1,4 +1,4 @@
-{- Merch.Race.ItemSetPrice - Compute prices of sets of items.
+{- Merch.Race.Economy.ItemSetPrice - Compute prices of sets of items.
 
 Copyright 2013 Alan Manuel K. Gloria
 
@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 -}
-module Merch.Race.ItemSetPrice
+module Merch.Race.Economy.ItemSetPrice
   ( ItemSetPriceM(..)
   , highestItemSetPrice
   , lowestItemSetPrice
