@@ -20,18 +20,9 @@ along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 
 {- Non-player (computer) merchants model.  -}
 
-{- We model the other merchants as a voltage network.
-   We consider the difference in surpluses between
-   each pair of settlements as the "raw" voltage; the
-   settlement with higher surplus has a higher voltage
-   and items flow from the higher surplus to the lower
-   surplus.  Since merchants are money-grubbers, the
-   raw voltage is multiplied by the return on
-   investment (the price at the target divided by the
-   price at the source).  The resistance is then the
-   distance between the settlements; dividing the
-   voltage by the resistance yields a current flow of
-   items.  -}
+{- Merchants move items from settlements with low price
+   to settlements with high price.  If the base price of
+   the item is cheapr, the merchant can move more items.  -}
 module Merch.Race.CMerch
   ( CMerchM(..)
   , cmerch
@@ -46,12 +37,13 @@ class Monad m => CMerchM m where
   cmGetAllSettlements :: m [Settlement]
   cmGetAllItems :: m [Item]
   cmGetDistance :: Settlement -> Settlement -> m Distance
-  cmGetSurplus :: Settlement -> Item -> m (Ratio Integer)
   cmGetPrice :: Settlement -> Item -> m Price
   -- A difficulty setting for the game.  The higher,
   -- the more efficient other merchants are and the
   -- smaller price differences are between setlements.
   cmGetPorosity :: m (Ratio Integer)
+  -- Transfer items from the first settlement
+  -- to the second settlement.
   cmTransfer :: Settlement -> Settlement -> Ratio Integer -> Item -> m ()
 
 cmerch :: CMerchM m => m ()
@@ -65,35 +57,35 @@ cmerch = do
   let pds = zip pairs distances
       pdis = [(s1, s2, d, i) | ((s1, s2), d) <- pds, i <- items]
 
-  actions <- forM pdis $ \ (s1, s2, dist, item) -> do
-    surplus1 <- cmGetSurplus s1 item
-    surplus2 <- cmGetSurplus s2 item
-    let s1Higher = surplus1 > surplus2
+  forM_ pdis $ \ (s1, s2, dist, item) -> do
+    -- items flow from settlement with lower price
+    -- to settlement with higher price.
+    price1 <- cmGetPrice s1 item
+    price2 <- cmGetPrice s2 item
+    let s1Cheaper = price1 < price2
         source
-          | s1Higher  = s1
+          | s1Cheaper = s1
           | otherwise = s2
         target
-          | s1Higher  = s2
+          | s1Cheaper = s2
           | otherwise = s1
-        sourceSurplus
-          | s1Higher  = surplus1
-          | otherwise = surplus2
-        targetSurplus
-          | s1Higher  = surplus2
-          | otherwise = surplus1
-    sourcePrice <- cmGetPrice source item
-    targetPrice <- cmGetPrice target item
-    let roi = fromIntegral targetPrice % fromIntegral sourcePrice
-        voltage = roi * (sourceSurplus - targetSurplus)
+        sourcePrice
+          | s1Cheaper = price1
+          | otherwise = price2
+        targetPrice
+          | s1Cheaper = price2
+          | otherwise = price1
+    let iSourcePrice = fromIntegral sourcePrice
+        roi = fromIntegral targetPrice % iSourcePrice
+        voltage = roi / (iSourcePrice % 1)
         resistance = fromIntegral dist % 1
         current = voltage / resistance
 
         num = porosity * current
-    if (num > 0)
-      then return (cmTransfer source target num item)
-      else return (return ())
-
-  sequence_ actions
+        finalNum
+          | num > 0   = num
+          | otherwise = 0
+    cmTransfer source target finalNum item
 
 pairsOf :: [a] -> [(a, a)]
 pairsOf []     = []
