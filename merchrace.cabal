@@ -42,6 +42,7 @@ executable merchrace
                ,  Merch.Race.Data.TMap
                ,  Merch.Race.Economy.CMerch
                ,  Merch.Race.Economy.Craftsmen
+               ,  Merch.Race.Economy.Data
                ,  Merch.Race.Economy.ItemSetPrice
                ,  Merch.Race.Economy.ProdCons
                ,  Merch.Race.Economy.Market
