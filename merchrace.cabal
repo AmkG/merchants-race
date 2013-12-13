@@ -31,7 +31,7 @@ executable merchrace
                ,  stb-image == 0.2.*, bitmap == 0.0.2
                ,  SDL, SDL-image, SDL-ttf, Noise
                ,  mtl, array
-               ,  parsec, random
+               ,  parsec, random, parallel >= 3.0.0.0
   other-modules:  Math.Geom.Delaunay
                ,  Math.Geom.QuadEdge
                ,  Math.Geom.QuadEdge.Data
@@ -40,6 +40,7 @@ executable merchrace
                ,  Merch.Race.Data
                ,  Merch.Race.Data.Serialize
                ,  Merch.Race.Data.TMap
+               ,  Merch.Race.Economy
                ,  Merch.Race.Economy.CMerch
                ,  Merch.Race.Economy.Craftsmen
                ,  Merch.Race.Economy.Data
