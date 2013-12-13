@@ -27,6 +27,7 @@ module Merch.Race.Data.TMap
   , settlementsTMap -- TMap -> [(Settlement, SettlementType, HexCoord)]
   , settlementAtTMap -- Monad m => TMap -> HexCoord -> m (Settlement, SettlementType)
   , distanceTMap -- TMap -> Settlement -> Settlement -> Distance
+  , settlementLookupTMap -- TMap -> Settlement -> (SettlementType, HexCoord)
 
   , MTMap
   , newMTMap -- (HexCoord, HexCoord) -> IO MTMap
@@ -64,6 +65,8 @@ data TMap
     , arrTMap :: UArray Int Word8
     , settlemapTMap :: Map HexCoord (Settlement, SettlementType)
     , distmapTMap :: Map (Settlement, Settlement) Distance
+    -- Not stored on-disk, just used in-memory as cache.
+    , rsettlemapTMap :: Map Settlement (SettlementType, HexCoord)
     }
 lookupTMap :: TMap -> HexCoord -> (Terrain, Bool)
 lookupTMap tmap h = final
@@ -144,6 +147,9 @@ distanceTMap tmap a b
  where
   core k = fromJust $ Map.lookup k (distmapTMap tmap)
 
+settlementLookupTMap :: TMap -> Settlement -> (SettlementType, HexCoord)
+settlementLookupTMap tm s = rsettlemapTMap tm Map.! s
+
 instance Serialize TMap where
   hPut h tm = do
     hPut h $ boundsTMap tm
@@ -162,7 +168,13 @@ instance Serialize TMap where
     tm <- freeze arr >>= \v -> return $ tm { arrTMap = v }
     tm <- hGet h >>= \v -> return $ tm { settlemapTMap = v }
     tm <- hGet h >>= \v -> return $ tm { distmapTMap = v }
+    tm <- return $ tm
+      { rsettlemapTMap = fromsettlemap $ settlemapTMap tm
+      }
     return tm
+
+fromsettlemap :: Map HexCoord (Settlement, SettlementType) -> Map Settlement (SettlementType, HexCoord)
+fromsettlemap = Map.fromList . map (\ (h,(s,st)) -> (s,(st,h))) . Map.toList
 
 -------------------------------------------------------------------------------
 
@@ -263,6 +275,7 @@ freezeMTMap mtmap = do
            , arrTMap = arr
            , settlemapTMap = settlemap
            , distmapTMap = distmap
+           , rsettlemapTMap = fromsettlemap settlemap
            }
 
 unfreezeTMap :: TMap -> IO MTMap
