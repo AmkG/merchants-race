@@ -38,7 +38,7 @@ module Merch.Race.Economy.ProdCons
   ) where
 
 import Merch.Race.Data
-import Merch.Race.ItemSetPrice
+import Merch.Race.Economy.ItemSetPrice
 import Merch.Race.RGX
 
 import Control.Monad

@@ -33,7 +33,7 @@ module Merch.Race.Economy.Craftsmen
   ) where
 
 import Merch.Race.Data
-import Merch.Race.ItemSetPrice
+import Merch.Race.Economy.ItemSetPrice
 
 import Control.Monad
 import Data.List
