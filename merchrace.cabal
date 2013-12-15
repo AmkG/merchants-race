@@ -69,6 +69,7 @@ executable merchrace
                ,  Merch.Race.UI.Button
                ,  Merch.Race.UI.Drawing
                ,  Merch.Race.UI.DrawingCombinators
+               ,  Merch.Race.UI.LineGraph
                ,  Merch.Race.UI.Minimap
                ,  Paths_merchrace
 
