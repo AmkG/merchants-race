@@ -15,4 +15,39 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Merchant's Race.  If not, see <http://www.gnu.org/licenses/>.
 */
+difficulty "Normal" {
+  description {
+    "Typical level of difficulty."
+  }
+  cartUpgradeCost 100% {1 "Tools"}
+  supplyCost 10% any {
+    {1 "Grain" 1 "Dried Fish"}
+    {1 "Grain" 1 "Cured Meat"}
+    {1 "Grain" 1 "Fruit"}
+  }
+  innCost 25% any {
+    {1 "Grain" 1 "Dried Fish"}
+    {1 "Grain" 1 "Cured Meat"}
+    {1 "Grain" 1 "Fruit"}
+  }
+  marketLunchCost 25% any {
+    {1 "Grain" 1 "Dried Fish"}
+    {1 "Grain" 1 "Cured Meat"}
+    {1 "Grain" 1 "Fruit"}
+  }
+  pubLunchCost 50% any {
+    {1 "Grain" 1 "Dried Fish"}
+    {1 "Grain" 1 "Cured Meat"}
+    {1 "Grain" 1 "Fruit"}
+  }
+  banditProbability {
+    mountain 5%
+    hill 3%
+    forest 2%
+  }
+  permeability 25%
+  interestRate 0.3%
+  priceSettings 500 20% 50% 1%
+  startingLoan 1000
+}
 
