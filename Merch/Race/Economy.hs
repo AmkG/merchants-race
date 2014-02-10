@@ -102,7 +102,7 @@ stepEconomy (rs,tm,di) e g = finalE `seq` (finalE, g'')
   lastDay = today == 365
   nextDay
     | lastDay   = 1
-    | otherwise = today
+    | otherwise = today + 1
   finalE = aveE
     { eToday = nextDay
     , eScheduledRGX = if lastDay then rgx2 else eScheduledRGX aveE
